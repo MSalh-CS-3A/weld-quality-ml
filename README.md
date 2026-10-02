@@ -12,12 +12,15 @@ Machine learning project investigating the quality of steel welds. The original 
 ├── sujet.md
 ├── specs/
 │   └── spec.md
+├── scripts/
+│   └── download_data.py
 ├── notebooks/
 │   ├── 01_eda.ipynb
 │   └── 02_modeling.ipynb
 ├── src/
 │   └── weld_quality/
 │       ├── __init__.py
+│       ├── download.py
 │       ├── preprocessing.py
 │       ├── train.py
 │       ├── metrics.py
@@ -30,7 +33,8 @@ Machine learning project investigating the quality of steel welds. The original 
 ├── reports/
 │   └── figures/
 └── tests/
-    └── README.md
+    ├── README.md
+    └── test_download.py
 ```
 
 ## Setup
@@ -47,9 +51,28 @@ python -m jupyterlab
 
 Select the **Welding Quality** kernel for the notebooks. Installing the package lets notebooks import `weld_quality` without modifying `sys.path`.
 
+## Download the data
+
+From the project root, run:
+
+```bash
+python scripts/download_data.py
+```
+
+This command uses only Python's standard library, so it also works before installing dependencies. It downloads the Cambridge archive, verifies its pinned SHA-256 checksum, and saves these files in `data/raw/`:
+
+- `welddb.tar`: original downloaded archive.
+- `welddb.data`: original whitespace-separated dataset.
+- `welddb.info` and `welddb.tex`: source documentation.
+- `manifest.json`: source URLs, preparation timestamp, and file checksums.
+
+Repeat runs verify the cached archive and extracted files without downloading again. Missing extracted files are restored; modified raw files are reported and preserved. A changed upstream archive is rejected so both students use the same dataset version.
+
+Dataset files and the local manifest are ignored by Git. Commit the script and documentation so each collaborator can reproduce the download. See [data/README.md](data/README.md) for loading details.
+
 ## Workflow
 
-1. Obtain the dataset linked in `sujet.md`, place the unchanged files in `data/raw/`, and record provenance in `data/README.md`.
+1. Run `python scripts/download_data.py` to obtain the original data and local provenance manifest.
 2. Explore missing values, variable meanings, units, and potential targets in `notebooks/01_eda.ipynb`.
 3. Document the prediction task and validation protocol in `specs/spec.md`.
 4. Implement reusable preprocessing, training, metrics, and evaluation in `src/weld_quality/`.
@@ -58,7 +81,7 @@ Select the **Welding Quality** kernel for the notebooks. Installing the package 
 
 Fit learned preprocessing and semi-supervised steps only on the permitted training data within each validation fold. Record random seeds, split definitions, and model parameters with experiment results.
 
-This repository starts as a scaffold: the notebooks contain outlines and the Python modules contain purpose statements. No data has been downloaded and no models have been trained.
+The downloader is implemented. The analysis notebooks contain outlines and the modeling modules contain purpose statements; no models have been trained.
 
 ## Tests
 
@@ -68,4 +91,10 @@ Add focused tests for meaningful data and evaluation behavior as it is implement
 python -m pytest
 ```
 
-There are no tests yet. Generated data, model artifacts, and local environments are excluded from Git.
+The download tests run offline and check checksum validation, repeat runs, preservation of raw files, and rejection of unexpected archive paths and links. They can also run without development dependencies:
+
+```bash
+PYTHONPATH=src python -m unittest discover -s tests -v
+```
+
+Generated data, model artifacts, and local environments are excluded from Git.
