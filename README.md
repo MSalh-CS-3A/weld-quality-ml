@@ -72,6 +72,11 @@ Dataset files and the local manifest are ignored by Git. Commit the script and d
 
 ## Workflow
 
+For two-person collaboration, see [the task backlog and GitHub workflow](specs/tasks.md).
+It includes independent EDA for both teammates, shared protocol design, separate
+method experiments, and joint interpretation and writing. Issue and PR templates
+are in `.github/`; record actual task time in `specs/time_log.csv` for the report's Gantt.
+
 1. Run `python scripts/download_data.py` to obtain the original data and local provenance manifest.
 2. Explore missing values, variable meanings, units, and potential targets in `notebooks/01_eda.ipynb`.
 3. Document the prediction task and validation protocol in `specs/spec.md`.
