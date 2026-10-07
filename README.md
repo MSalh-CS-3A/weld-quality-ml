@@ -86,7 +86,21 @@ are in `.github/`; record actual task time in `specs/time_log.csv` for the repor
 
 Fit learned preprocessing and semi-supervised steps only on the permitted training data within each validation fold. Record random seeds, split definitions, and model parameters with experiment results.
 
-The downloader is implemented. The analysis notebooks contain outlines and the modeling modules contain purpose statements; no models have been trained.
+The downloader and preprocessing investigation are implemented. Run
+`notebooks/01_eda.ipynb` from top to bottom to reproduce measurement audits,
+grouped imputation checks, distribution diagnostics and exploratory PCA.
+Reusable code is in `schema.py`, `preprocessing.py`, `exploration.py` and
+`plotting.py`. Scientific choices and unresolved unit/annotation questions are
+recorded in `specs/spec.md` and `reports/02_preprocessing_plan.md`.
+
+The notebook exports local derived matrices, per-cell provenance, benchmark
+metrics, split definitions and a reproducibility manifest to
+`data/processed/preprocessing/` (ignored by Git). Figures are saved in
+`reports/figures/`. These full-data exploratory matrices are not suitable as
+precomputed inputs for predictive cross-validation: fit `WeldInputImputer`,
+scaling and PCA inside each training fold. The modeling notebook remains an
+outline; no quality target, predictive model or semi-supervised protocol has
+been adopted.
 
 ## Tests
 
@@ -96,7 +110,11 @@ Add focused tests for meaningful data and evaluation behavior as it is implement
 python -m pytest
 ```
 
-The download tests run offline and check checksum validation, repeat runs, preservation of raw files, and rejection of unexpected archive paths and links. They can also run without development dependencies:
+The tests run offline. Download checks cover checksums, cached runs, preservation
+of raw files and rejection of unsafe archives. Preprocessing checks cover
+measurement provenance, bounds, annotation parsing, input/target separation,
+process support by groups, paired PWHT, shared masks and grouped verification.
+They also run with the project dependencies and Python's standard test runner:
 
 ```bash
 PYTHONPATH=src python -m unittest discover -s tests -v
