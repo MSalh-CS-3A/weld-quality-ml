@@ -33,5 +33,27 @@ Les hashes des fichiers bruts sont inchangés. Les logs d'exécution sont locaux
 sous `data/processed/notebook_verification/`. Cette vérification exécute le code
 des cellules avec Python ; elle ne prétend pas tester l'interface Jupyter.
 
-La simplification de l'EDA, la suppression du package devenu inutile et la mise
-à jour générale des documents font partie des étapes suivantes de cette migration.
+## Étape 3 — EDA allégée et suppression du package d'analyse
+
+- `01_eda.ipynb` passe de 40 à 13 cellules. Il conserve les statuts de mesure,
+  répétitions, procédés, distributions sélectionnées, relations entre propriétés,
+  ambiguïtés Charpy et une ACP descriptive. Les longues comparaisons d'imputation,
+  leurs répétitions de tableaux et leurs multiples scénarios d'ACP sont retirés
+  du notebook, avec les preuves historiques conservées dans les rapports et Git.
+- L'ACP actuelle utilise 1 339 lignes dédupliquées avec les onze entrées exactes
+  complètes, sans imputation. PC1/PC2 expliquent respectivement 27,02 % et 19,03 %
+  de la variance standardisée de ce sous-ensemble (46,05 % cumulés).
+- Le package `src/weld_quality/` et sa configuration d'installation sont supprimés.
+  Le téléchargeur existant devient autonome dans `scripts/download_data.py`, avec
+  les mêmes garanties de checksum et de préservation du brut.
+- `requirements.txt`, le README et la consigne d'architecture reflètent les
+  notebooks autonomes. Les tests de l'ancien package sont remplacés par des
+  contrôles ciblés qui exécutent les définitions du notebook 02 directement.
+
+Vérification : six cellules de code EDA exécutées de haut en bas depuis
+`notebooks/`, cinq figures exportées, fichiers bruts inchangés. Quinze tests
+hors ligne passent : cinq téléchargement et dix parsing, provenance, groupes,
+schémas, fit du train, valeurs observées, PWHT et non-convergence.
+
+La prochaine étape clôt la mise à jour des specs, du rapport et du backlog,
+et retire les sources AI originales de l'arborescence active après sauvegarde Git.

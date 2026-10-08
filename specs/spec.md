@@ -406,3 +406,10 @@ PWHT cases with no compatible training pair now raise, as do non-converged fits.
 The manifest records notebook source identity, units and fixed-model parameters.
 The [migration report](../reports/08_notebook_migration.md) records the stages;
 final models and semi-supervised experiments remain pending.
+
+The EDA migration reduces `01_eda.ipynb` from 40 to 13 cells. It retains a
+descriptive PCA on 1,339 deduplicated complete rows (11 exact inputs), without
+imputation: PC1/PC2 explain 27.02%/19.03%, 46.05% together. The old package and
+installation metadata are removed; download acquisition remains a standalone
+stdlib script. Fifteen offline checks pass against the downloader and notebook
+definitions, including the corrected partial-PWHT and non-convergence policies.
