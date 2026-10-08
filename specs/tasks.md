@@ -30,13 +30,27 @@ placeholders; choose which teammate is A before assigning GitHub issues.
 Use separate notebooks for independent EDA, such as `01_eda_a.ipynb` and
 `01_eda_b.ipynb`, then consolidate in `01_eda.ipynb`. Give each method its own
 experiment notebook or script. Agree before changing shared evaluation code,
-and keep reusable functions in `src/weld_quality/`. Record scientific decisions
+and keep analysis code directly in the relevant notebook. Record scientific decisions
 in `specs/spec.md`; GitHub discussion links supplement that record.
 
 Repository templates become available on GitHub after they reach its default
 branch. This backlog does not claim that any GitHub issues or board exist yet.
 
 ## Backlog
+
+### Current technical state — 2026-10-08
+
+The three active notebooks are now `01_eda`, `02_data_preparation` and
+`03_modeling`, with analysis code directly in their cells. EDA/preparation,
+traction eligibility, grouped outer/inner splits and a fixed-parameter sensitivity
+benchmark are implemented and locally reproduced. The next work is T07 model
+choice/budgets, then T08–T10 tuning, training and supervised/semi-supervised
+comparisons. T05 tuning budgets and source/group sensitivities remain open.
+
+This technical status does not claim that both teammates completed independent
+EDA, cross-review or reproduction. Agree on owners, course methods and actual
+work times; `time_log.csv` is not filled with inferred hours. Historical package
+code and AI sources are preserved in Git, outside the active notebook workflow.
 
 These tasks describe outcomes, not chosen targets or model families. Final
 method selection depends on the inspected data, task framing, and course content.
@@ -123,7 +137,7 @@ Outcome: every method can be evaluated under a common reproducible protocol.
 Outcome: both teammates can run and explain one complete evaluation pipeline.
 
 - [ ] Implement a simple baseline suitable for the chosen task, with reusable
-      preprocessing, metrics, and evaluation code in `src/weld_quality/`.
+      preprocessing, metrics, and evaluation code in the modeling notebook.
 - [ ] Generate consistent splits and experiment summaries under T05's protocol.
 - [ ] Add focused checks for split separation and meaningful leakage risks.
 - [ ] Run the baseline on both teammates' environments and record actual outcomes.

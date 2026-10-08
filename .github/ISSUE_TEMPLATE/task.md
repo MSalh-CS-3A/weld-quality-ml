@@ -31,5 +31,5 @@ research, provide references and limitations. Add focused tests when warranted.
 ## Scope and files
 
 Expected files and any explicit exclusions. Keep reusable code in
-`src/weld_quality/` and preserve raw data. Do not commit datasets, trained models,
+the relevant notebook under `notebooks/` and preserve raw data. Do not commit datasets, trained models,
 credentials, or local environments.

@@ -55,5 +55,45 @@ Vérification : six cellules de code EDA exécutées de haut en bas depuis
 hors ligne passent : cinq téléchargement et dix parsing, provenance, groupes,
 schémas, fit du train, valeurs observées, PWHT et non-convergence.
 
-La prochaine étape clôt la mise à jour des specs, du rapport et du backlog,
-et retire les sources AI originales de l'arborescence active après sauvegarde Git.
+## Étape 4 — Documentation active et clôture de la migration
+
+Les specs sont réécrites autour du protocole actif : cibles de traction,
+cohorte 13, provenance, imputation dans les plis, métriques et données permises
+pour la future semi-supervision. Le README, la documentation des unités/exports,
+le backlog et le template d'issue reflètent l'organisation en notebooks.
+`reports/01_eda_report.md` devient le rapport intermédiaire actuel, avec l'ACP
+recalculée et les résultats de contrôle, sans prétendre aux expériences finales.
+Les rapports précédents sont signalés comme historiques.
+
+Les sources AI originales, sauvegardées dans `2ecb088`, sont retirées de
+l'arborescence active ; les artefacts fournis restants dans `ai_prepared/` sont
+ignorés et ne sont jamais chargés par les notebooks. Le répertoire `src/` et ses
+caches/metadata d'installation devenus inutiles sont supprimés. Ni le brut,
+ni l'énoncé, ni les fichiers fournis de données/joblib/ZIP ne sont modifiés.
+
+| Étape | Commit |
+| --- | --- |
+| Sauvegarde initiale et audits | `2ecb088` |
+| Préparation autonome et point d'entrée de modélisation | `643dbee` |
+| EDA allégée, package supprimé et tests directs | `1863426` |
+| Documentation active et clôture | Commit de cette révision |
+
+## Phase disponible après migration
+
+Le prochain travail commence dans `03_modeling.ipynb` : choisir les méthodes,
+leurs budgets et une approche semi-supervisée justifiée, puis régler et entraîner
+avec les plis exportés. Il n'est pas nécessaire de reconstruire le nettoyage.
+Les règles de tuning, les extensions et sensibilités doivent être arrêtées dans
+l'entraînement ; les validations externes restent réservées à l'évaluation.
+
+Les notebooks versionnés ont les sorties vidées pour rester lisibles. Les cinq
+figures EDA actuelles sont disponibles dans `reports/figures/` ; les CSV et logs
+sont générés localement, ignorés par Git. Aucun entraînement final, résultat
+semi-supervisé, heure de binôme ou recommandation pratique n'est inventé.
+
+Vérification finale après retrait des anciens modules : les quinze tests passent,
+le point d'entrée `03_modeling` s'exécute aussi depuis la racine, les hashes de
+tous les exports et du source du notebook 02 correspondent au manifeste. Les
+hashes des CSV/ZIP/joblib fournis restent identiques à ceux de l'audit ; `sujet.md`
+est identique à la sauvegarde initiale. L'état final contient trois notebooks
+de 13, 24 et 7 cellules, respectivement, sans sorties versionnées volumineuses.

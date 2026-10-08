@@ -1,5 +1,9 @@
 # Audit détaillé — Analyse descriptive et préparation des données
 
+> Document historique antérieur à la migration des notebooks. Le protocole actif
+> est dans `specs/spec.md` ; les sources antérieures sont conservées dans Git
+> (sauvegarde `2ecb088`). Voir `reports/08_notebook_migration.md`.
+
 **Projet : prédiction de propriétés représentatives de la qualité des soudures.**  
 **Date : 3 octobre 2026.**  
 **Statut : rédaction intermédiaire ; unités suspectes, cible et protocole à confirmer.**

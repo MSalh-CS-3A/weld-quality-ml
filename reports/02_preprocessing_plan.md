@@ -1,5 +1,9 @@
 # Proposition de preprocessing et de validation de l'ACP
 
+> Document historique antérieur à la migration des notebooks. Le protocole actif
+> est dans `specs/spec.md` ; les sources antérieures sont conservées dans Git
+> (sauvegarde `2ecb088`). Voir `reports/08_notebook_migration.md`.
+
 Date : 5 octobre 2026. Statut : plan proposé, non implémenté dans le notebook. Aucun dataset imputé, aucune conversion d'unité et aucun résultat d'ACP ou de modèle ne sont produits par ce document.
 
 **Mise à jour du 5 octobre 2026 :** le plan a ensuite été approuvé et son workflow

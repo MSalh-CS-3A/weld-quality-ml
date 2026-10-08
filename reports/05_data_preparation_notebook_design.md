@@ -1,5 +1,9 @@
 # Résultats complémentaires et contenu du futur notebook de préparation
 
+> Document historique antérieur à la migration des notebooks. Le protocole actif
+> est dans `specs/spec.md` ; les sources antérieures sont conservées dans Git
+> (sauvegarde `2ecb088`). Voir `reports/08_notebook_migration.md`.
+
 Date : 8 octobre 2026. Le choix de l'imputation itérative est fixé par
 l'utilisateur. Ce document précise les variables, les contrôles et les exports
 du futur notebook ; il ne crée pas encore ce notebook et ne produit aucun

@@ -22,11 +22,8 @@ data/processed/*
 models/*
 !models/.gitkeep
 
-# Supplied AI-generated datasets and serialized preprocessing artifacts
-ai_prepared/*.csv
-ai_prepared/*.joblib
-ai_prepared/*.zip
-ai_prepared/modeling/
+# Local AI-supplied reference artifacts; migrated sources live in notebooks/
+ai_prepared/
 
 # Editor and office temporary files
 .DS_Store

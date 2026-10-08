@@ -1,5 +1,9 @@
 # Analyse du preprocessing et plan proposé jusqu'à l'entraînement
 
+> Document historique antérieur à la migration des notebooks. Le protocole actif
+> est dans `specs/spec.md` ; les sources antérieures sont conservées dans Git
+> (sauvegarde `2ecb088`). Voir `reports/08_notebook_migration.md`.
+
 Date : 8 octobre 2026. Statut : proposition d'action, pas une exécution du
 nettoyage ni de l'entraînement. Les chiffres nouveaux ci-dessous viennent d'une
 relecture du brut et des exports existants. Aucune performance prédictive n'est

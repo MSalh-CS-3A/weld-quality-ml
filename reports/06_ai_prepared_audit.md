@@ -1,5 +1,9 @@
 # Audit du dataset et du notebook `ai_prepared`
 
+> Document historique antérieur à la migration des notebooks. Le protocole actif
+> est dans `specs/spec.md` ; les sources antérieures sont conservées dans Git
+> (sauvegarde `2ecb088`). Voir `reports/08_notebook_migration.md`.
+
 Date : 8 octobre 2026. Verdict : cohérence technique des CSV validée ; nettoyage
 scientifique et protocole non validés comme préparation finale du projet.
 Aucun fichier fourni dans `ai_prepared/` n'a été modifié.

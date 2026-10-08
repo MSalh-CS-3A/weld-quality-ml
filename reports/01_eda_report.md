@@ -1,41 +1,150 @@
-# Première partie — Analyse descriptive de la base de soudures
+# Rapport intermédiaire — données et préparation avant entraînements
 
-**Version intermédiaire, 3 octobre 2026.** Cette section couvre l'audit des mesures et des distributions. L'ACP, la définition définitive des cibles et les résultats de modèles restent à ajouter aux sections appropriées du rapport final.
+**État vérifié au 8 octobre 2026.** Les données et le protocole de traction sont
+prêts pour le choix des modèles. Ce document prépare le rapport final demandé
+par le sujet ; il ne remplace pas encore les expériences réglées, la comparaison
+semi-supervisée, les informations du binôme et le Gantt.
 
-## Données et disponibilité
+## Données et problème étudié
 
-La base Cambridge comporte **1 652 observations et 44 variables** décrivant la composition chimique, les paramètres de soudage, les traitements thermiques, les propriétés mécaniques et la microstructure. Les unités documentées comprennent pourcentages massiques, ppm massiques, A, V, kJ/mm, °C, heures, MPa et J. Les données proviennent de publications ; le code `N` indique une valeur non rapportée, sans signifier zéro. [Documentation Cambridge](https://www.phase-trans.msm.cam.ac.uk/map/data/materials/welddb-b.html)
+La base Cambridge Weld DB comporte 1 652 observations et 44 champs : composition
+chimique, paramètres de soudage, traitements thermiques, propriétés mécaniques
+et microstructure. Les unités mélangent wt%, ppm massiques, A, V, kJ/mm, °C, h,
+MPa, J et %. Les fichiers d’origine restent inchangés. La documentation source
+précise que `N` signifie non rapporté, sans signifier zéro ; voir
+[la provenance et les unités](../data/README.md).
 
-Le carbone, le silicium, le manganèse, l'apport thermique et le procédé sont entièrement renseignés. La disponibilité est toutefois hétérogène : aucune ligne ne comporte les 44 valeurs. Supprimer toutes les observations incomplètes supprimerait donc toute la base. La figure 1 distingue les absences des mesures censurées et annotées.
+Nous retenons des régressions séparées de limite d’élasticité, résistance maximale
+et allongement ; la réduction de section est complémentaire. Ces mesures décrivent
+plusieurs aspects de la qualité. Aucun score universel ni seuil de qualité n’est
+inventé. Une sortie manquante reste inconnue ; chaque tâche a ses propres labels.
 
-![Figure 1 — Disponibilité des mesures pour une sélection de variables.](figures/01_eda_availability.png)
+| Population | Lignes | YS | UTS | Allongement | Réduction de section |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Brut | 1 652 | 780 | 738 | 700 | 705 |
+| Dédupliqué | 1 648 | 777 | 735 | 697 | 702 |
+| Cohorte principale | 1 555 | 706 | 677 | 631 | 635 |
 
-*Figure 1 — Effectifs par statut de mesure, sur 1 652 lignes. « Exacte » désigne un nombre sans annotation, sans préjuger de l'incertitude expérimentale.*
+*Tableau 1 — Effectifs de labels observés ; aucune propriété mécanique n’est imputée.*
 
-## Distributions et cohérence des mesures
+## EDA conservée et ambiguïtés
 
-Le carbone varie de 0,029 à 0,18 % massique, avec une médiane de 0,074 %. Le chrome et le molybdène présentent plusieurs concentrations de valeurs, suggérant différentes familles de compositions ou séries expérimentales à vérifier par source. L'intensité varie de 115 à 900 A, avec une médiane de 170 A ; les 30 observations à 850–900 A appartiennent toutes au procédé `SA`. Ces extrêmes ne doivent donc pas être supprimés automatiquement. Les pics de températures et d'apport thermique peuvent refléter des réglages répétés.
+L’EDA actuelle est concentrée dans 13 cellules : statuts des mesures, répétitions,
+procédés, distributions sélectionnées, propriétés, Charpy et ACP descriptive.
+La base contient 1 490 identifiants distincts, dont 91 répétés ; les quatre
+répétitions exactes hors ID ne résument donc pas toutes les observations liées.
+Les profils d’absence varient entre procédés ; nous ne les supposons pas aléatoires.
 
-Aucune valeur numérique contrôlée ne dépasse les bornes physiques générales utilisées. Sur les 714 observations où les deux résistances sont renseignées, aucune limite d'élasticité ne dépasse la résistance maximale en traction. Ces contrôles ne prouvent cependant ni l'homogénéité des unités ni la validité métallurgique de chaque mesure. La variable `fatt_50` n'a pas été contrôlée par une borne, son unité n'étant pas explicitée.
+Les distributions de la figure 1 concernent les nombres exacts après retrait des
+quatre doublons, avec l’effectif de chaque variable. Les extrêmes sont conservés :
+leur amplitude ne démontre pas une erreur. Les corrélations de traction utilisent
+uniquement les paires observées, avec leurs effectifs disponibles dans le notebook.
 
-Plusieurs ambiguïtés subsistent. Dix lignes EPRI contiennent de l'aluminium entre 0,004 et 0,014 dans une colonne annoncée en ppm. Les mêmes 90 lignes présentent simultanément des valeurs positives inférieures à 1 pour l'étain, l'arsenic et l'antimoine. Ces motifs justifient un retour aux publications, sans conversion automatique. Si une valeur était exprimée en pourcentage massique, `1 % = 10 000 ppm` ; une standardisation ne corrigerait pas une confusion d'unité.
+![Figure 1 — Distributions sélectionnées, nombres exacts dédupliqués.](figures/eda_selected_distributions.png)
 
-Les valeurs `<L` sont censurées sous une limite. Elles représentent 403 des 905 mesures rapportées d'aluminium et 419 des 504 mesures de bore. Les histogrammes des seuls nombres sans annotation peuvent donc être biaisés. Il faut aussi traiter 38 intervalles de température `150-200`, 59 annotations d'azote et 58 annotations de dureté. Pour la dureté, ces dernières contiennent des nombres allant jusqu'à 467, absents de l'histogramme limité aux 80 valeurs sans annotation. Leur protocole Vickers doit être conservé et vérifié. [Présentation des essais de dureté par TWI](https://www.twi-global.com/technical-knowledge/job-knowledge/hardness-testing-part-1-074)
+*Figure 1 — Populations et unités indiquées par panneau ; les valeurs censurées,
+intervalles et annotations ne sont pas présentées comme nombres exacts.*
 
-## Propriétés candidates et conséquences méthodologiques
+La préparation garde un token, statut, bornes et annotation pour chaque cellule
+numérique, soit 66 080 cellules. `<L` est représenté par L/2 et les intervalles par
+leur milieu, explicitement comme approximations. Les 322 cellules dont l’unité
+est douteuse sont mises à NaN sans conversion ; les 59 annotations d’azote sont
+conservées séparément, leur comparabilité restant non établie. Valeurs et protocoles
+de dureté sont séparés. Les autres valeurs mesurées, dont les zéros PWHT, restent
+préservées. Les seuls procédés fusionnés sont les synonymes documentés.
 
-| Propriété candidate | Mesures | Minimum | Médiane | Maximum |
+L’énergie Charpy et sa température doivent être interprétées ensemble. Après
+retrait des doublons, 355 des 877 énergies valent 100 J et 118 valent 28 J. Les
+signatures par série sont des hypothèses à vérifier dans les sources ; elles ne
+valident pas une tâche à elles seules. E(T), T100J et T28J restent en attente.
+La température Charpy n’entre pas dans les régressions de traction.
+
+## ACP descriptive
+
+L’ACP conserve onze entrées numériques : C, Si, Mn, S, P, courant, tension,
+apport thermique, température entre passes, température et durée PWHT. Elle est
+ajustée après standardisation sur les 1 339 lignes dédupliquées dont ces entrées
+sont toutes des nombres exacts. Aucun remplissage n’est nécessaire dans ce
+sous-ensemble ; il peut différer de la population complète.
+
+PC1 et PC2 expliquent respectivement 27,02 % et 19,03 % de sa variance
+standardisée, soit 46,05 % cumulés ; les trois premières expliquent 61,26 %.
+PC1 donne notamment des poids élevés à l’apport thermique, au courant et à la
+tension. Ces composantes décrivent des associations, pas des causes de qualité.
+
+![Figure 2 — ACP sur les onze entrées exactes complètes.](figures/eda_complete_inputs_pca.png)
+
+*Figure 2 — Variance des composantes et cumul sur 1 339 observations complètes.
+Cette ACP descriptive n’est pas réutilisée pour évaluer les modèles.*
+
+Les anciens essais d’ACP après différentes imputations et les benchmarks de
+reconstruction restent dans le [rapport historique du 5 octobre](03_preprocessing_results.md)
+et Git. Leur retrait de l’EDA allège l’exécution sans effacer les preuves. Les
+scores de reconstruction sur onze entrées ne démontrent pas la reconstruction
+sur la nouvelle cohorte treize entrées, ni celle des absences réelles.
+
+## Préparation et protocole retenus
+
+Le candidat principal comprend les onze entrées précédentes, oxygène et azote,
+avec le procédé catégoriel. La cohorte exige au plus deux entrées numériques
+indisponibles et exclut les doublons. Ses 1 555 lignes couvrent 44 groupes.
+Ce seuil est un choix d’ingénierie, sans garantie de fiabilité. Les schémas 11/16
+restent des comparaisons futures ; leur exclusion du candidat principal ne prouve
+pas une absence d’effet physique.
+
+Les groupes dérivent des identifiants et des liens de doublons, de façon
+conservatrice ; ce ne sont pas encore des publications validées. Cinq plis
+externes et trois plis internes par train externe sont enregistrés. Toutes les
+méthodes partagent les mêmes validations pour chaque cible. Dans la cohorte,
+un pli externe comprend 8–10 groupes et 103–166 labels selon la cible.
+
+Standardisation, catégories et imputation itérative BayesianRidge sont ajustées
+uniquement sur le train de chaque pli. Initialisation médiane, graine 42,
+max_iter=100, tol=1e-3. Les valeurs observées restent intactes ; les PWHT estimés
+respectent les couples du train et les composantes observées. Colonne absente,
+non-convergence ou couple incompatible entraînent une erreur explicite.
+Le nettoyage exporte les données avant apprentissage ; la CV repart de ces tables.
+
+Les 105 lignes dédupliquées sans aucune des cinq cibles sont conservées, dont
+99 dans la cohorte. Une semi-supervision inductive pourra utiliser les lignes
+sans la cible de la tâche depuis les groupes du train uniquement. La validation,
+interne comme externe, reste exclue de l’apprentissage et des pseudo-labels.
+
+## Contrôle d’imputation et limites actuelles
+
+Le contrôle à paramètres fixes compare médiane/itérative sous Ridge et Random
+Forest sur les mêmes plis, avec une baseline à la médiane de y du train.
+Les quinze ajustements itératifs convergent en 4–7 itérations. Les huit exports
+et tous les scores reproduisent la préparation AI corrigée auditée.
+
+| Cible | Baseline MAE | RF/médiane MAE | RF/itérative MAE | RF/itérative R² moyen |
 | --- | ---: | ---: | ---: | ---: |
-| Limite d'élasticité, MPa | 780 | 315 | 495 | 920 |
-| Résistance maximale en traction, MPa | 738 | 447 | 575,5 | 1 151 |
-| Allongement, % | 700 | 10,6 | 26,8 | 37 |
-| Réduction de section, % | 705 | 17 | 75 | 83 |
-| Énergie Charpy, J | 879 | 3 | 100 | 270 |
+| YS, MPa | 70,45 | 65,39 | 66,13 | 0,077 |
+| UTS, MPa | 72,66 | 58,10 | 56,71 | 0,190 |
+| Allongement, points de % | 4,09 | 3,70 | 3,55 | 0,114 |
 
-*Tableau 1 — Disponibilité et distribution de propriétés candidates à la prédiction ; aucune cible définitive n'est encore retenue.*
+*Tableau 2 — Moyennes non pondérées des cinq plis externes, paramètres fixes.
+Ce contrôle de sensibilité ne constitue pas une sélection finale des modèles.*
 
-L'énergie Charpy comporte 356 valeurs à 100 J et 118 à 28 J. Certaines lignes pourraient décrire une température à énergie fixée : leur origine doit être vérifiée avant de définir la tâche. Cette caractérisation existe dans la littérature sur les soudures. [Article Cambridge sur la transition Charpy](https://www.phase-trans.msm.cam.ac.uk/abstracts/harsha4.html)
+L’itérative améliore plusieurs résultats, mais pas chaque cible/pli ; la médiane
+est légèrement meilleure pour YS avec RF. Les R² sont modestes et leurs causes
+ne sont pas isolées. Les dispersions par pli sont disponibles dans le notebook
+et le CSV, sans être interprétées comme tests de significativité.
 
-Enfin, 91 identifiants sont répétés, concernant 253 lignes ; des identifiants différents peuvent aussi désigner des variantes liées. La validation devra tenir compte de ces dépendances. Les prochaines étapes sont de résoudre les ambiguïtés d'unités et d'annotations, définir cible et entrées disponibles, justifier les groupes, puis établir le preprocessing et l'ACP. Les transformations apprises destinées aux modèles seront ajustées dans les plis d'entraînement. Les absences de cible resteront distinctes des absences d'entrée, et les labels de validation seront exclus de l'entraînement et des pseudo-labels.
+Les métriques finales seront MAE (moyenne des erreurs absolues), RMSE (racine de
+la moyenne des erreurs au carré), dans l’unité de la cible, et R², sans unité.
+Leur définition et les règles de comparaison sont dans [les specs](../specs/spec.md).
 
-Les [détails de l'audit, figures complémentaires, traçabilité et prochaines étapes](01_eda_audit_details.md) accompagnent cette synthèse. Cette analyse descriptive ne permet pas encore de recommander des réglages de soudage.
+## Prochaine phase
+
+Le notebook `03_modeling.ipynb` charge les données vérifiées, expose les pools et
+les partitions, et prépare le choix des méthodes. Il reste à confirmer les
+méthodes du cours, définir leurs budgets, régler dans les plis internes et
+comparer sur les mêmes plis externes. Au moins une méthode semi-supervisée doit
+être choisie sur une bibliographie justifiée ; COREG reste un candidat.
+
+Les ambiguïtés d’unités/Charpy, la sensibilité aux groupes et aux jeux d’entrées,
+les erreurs de modèles et la reproduction par le binôme restent à documenter.
+Aucune recommandation causale de réglage de soudure n’est établie. Le rapport
+final, les responsabilités et les temps réels du Gantt seront complétés avec les
+expériences. Voir [le compte rendu de migration](08_notebook_migration.md).

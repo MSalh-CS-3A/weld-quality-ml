@@ -1,5 +1,9 @@
 # Résultats de l'investigation de preprocessing
 
+> Document historique antérieur à la migration des notebooks. Le protocole actif
+> est dans `specs/spec.md` ; les sources antérieures sont conservées dans Git
+> (sauvegarde `2ecb088`). Voir `reports/08_notebook_migration.md`.
+
 Date : 5 octobre 2026. Analyse descriptive et vérification de reconstruction ;
 aucune cible de qualité ou méthode prédictive n'est adoptée.
 
