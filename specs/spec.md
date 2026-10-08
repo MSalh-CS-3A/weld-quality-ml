@@ -390,3 +390,19 @@ The 13-variable reconstruction advantage is not newly demonstrated by this
 notebook: its cited reconstruction figures concern the earlier 11-variable
 EDA benchmark. Feature-space/cohort comparisons, source-confirmed grouping,
 Charpy assignment and tuned final-model evaluation remain to be completed.
+
+### Notebook migration — preparation stage, 2026-10-08
+
+The user explicitly requests notebook-local analysis code, overriding the earlier
+preference for reusable code under `src/weld_quality/`. The corrected preparation
+now lives in `notebooks/02_data_preparation.ipynb`, with no project-module import,
+portable project paths and exports under `data/processed/modeling/`.
+`03_modeling.ipynb` replaces the old modeling outline and validates exported
+hashes, feature schemas and labeled/unlabeled partitions.
+
+All preparation/modeling cells execute sequentially from `notebooks/`; the eight
+derived CSVs match the corrected AI archive, including the benchmark. Partial
+PWHT cases with no compatible training pair now raise, as do non-converged fits.
+The manifest records notebook source identity, units and fixed-model parameters.
+The [migration report](../reports/08_notebook_migration.md) records the stages;
+final models and semi-supervised experiments remain pending.
