@@ -1,6 +1,6 @@
-# Spécification du projet — état avant les choix de modèles
+# Spécification du projet — préparation et plan d’expériences
 
-Mise à jour : 8 octobre 2026. L’énoncé original est préservé dans
+Mise à jour : 9 octobre 2026. L’énoncé original est préservé dans
 [sujet.md](../sujet.md). Cette spécification décrit le protocole actif ; les
 anciens essais et audits sont référencés à la fin, sans constituer le code courant.
 
@@ -14,9 +14,9 @@ La disponibilité effective des entrées dans le scénario d’utilisation doit 
 explicitée avant une recommandation pratique.
 
 **La phase de préparation est terminée pour démarrer les benchmarks de traction.**
-Les modèles finaux, leurs réglages, la méthode semi-supervisée et les conclusions
-pratiques restent à choisir et valider. La préparation ne prouve pas une forte
-performance prédictive.
+Le portefeuille supervisé et les budgets initiaux sont définis ci-dessous.
+Les réglages, l’implémentation semi-supervisée et les conclusions pratiques
+restent à valider. La préparation ne prouve pas une forte performance prédictive.
 
 ## Organisation retenue
 
@@ -81,7 +81,7 @@ Régressions séparées, avec éligibilité propre à chaque cible :
 | `elongation` | Allongement | % | 697 | 631 |
 | `reduction_area` | Réduction de section, complémentaire | % | 702 | 635 |
 
-Candidat principal : **A1_13**, treize entrées numériques + procédé catégoriel.
+Configuration de référence : **A1_13**, treize entrées numériques + procédé catégoriel.
 
 - A0_11 : C, Si, Mn, S, P, courant, tension, apport thermique, température entre
   passes, température PWHT et durée PWHT.
@@ -150,6 +150,15 @@ Cela ne prouve pas l’exactitude des absences réelles ni la convergence sur 16
 entrées. Les anciens scores de reconstruction sur 11 entrées ne sont pas un
 nouveau benchmark de reconstruction sur la cohorte 13 corrigée.
 
+Le master nettoyé conserve les NaN : dans la cohorte principale, 607 lignes ont
+au moins une entrée numérique absente, soit 1 075 cellules. L’imputation a déjà
+été ajustée pour les contrôles ; ses paramètres ne sont pas réutilisés pour
+les futurs fits. Pour chaque entraînement supervisé : fit du preprocessing sur
+les seules lignes étiquetées du train, transformation du train et de la validation
+avec ce même objet, puis fit/prédiction du modèle. Après les expériences, un
+modèle destiné à l’utilisation sera réajusté avec sa pipeline sur les données
+d’apprentissage retenues ; ce refit n’est pas une nouvelle validation.
+
 ## Modèles, métriques et prochaine phase
 
 Le contrôle existant utilise une constante à la médiane de y, Ridge alpha=1 et
@@ -165,17 +174,54 @@ observée au carré. MAE/RMSE sont en MPa ou points de %, R² sans unité. Le co
 actuel rapporte moyenne non pondérée et écart-type des cinq plis ; conserver
 les scores par pli et les effectifs. Ces écarts-types ne sont pas des IC.
 
-Prochaine étape dans `03_modeling.ipynb` : confirmer les méthodes du cours et
-leurs budgets, régler dans les trois plis internes, puis évaluer les choix sur
-les mêmes cinq plis externes. Comparer jeux d’entrées sur les mêmes validations.
-Conserver la baseline constante et choisir les comparateurs linéaire/non linéaire.
+Plan du 9 octobre, configuré dans `03_modeling.ipynb`, sans nouveaux scores :
 
-Au moins une méthode semi-supervisée est exigée par le sujet. COREG est un
-candidat bibliographique à confirmer, pas une méthode déjà entraînée. Protocole
-prévu : inductif, pools venant uniquement des groupes du train concerné (interne
+| Méthode | Raison du comparateur | Budget initial par train externe |
+| --- | --- | --- |
+| Médiane de y du train | Gain minimal à dépasser | Aucun réglage |
+| Ridge | Relation linéaire régularisée, comparateur simple | 6 alpha : 0,01 ; 0,1 ; 1 ; 10 ; 100 ; 1 000 |
+| SVR RBF | Comparateur à noyau non linéaire | C={1,10,100}, gamma={scale,0,05}, epsilon={0,05,0,2}, soit 12 configurations |
+| Random Forest | Interactions non linéaires par arbres | 300 arbres, leaf={1,2,5}, depth={None,10}, max_features={0,5;1}, soit 12 configurations |
+| kNN supervisé | Contrôle de la future semi-supervision | k={3,5,9,15}, p={1,2}, poids uniformes, soit 8 configurations |
+
+Les grilles sont des budgets de départ, pas des valeurs optimales établies.
+La SVR standardise aussi y sur le train uniquement ; ses prédictions sont
+reconverties en MPa/points de %. Les autres modèles gardent y dans son unité.
+MAE interne moyenne non pondérée des trois plis = critère de réglage ; conserver
+RMSE et R² pour l’analyse externe. A1_13 + imputation itérative sont fixés pour
+la première comparaison. La médiane d’imputation reste un contrôle documenté,
+pas une option sélectionnée sur les scores externes. L’adéquation du portefeuille
+aux méthodes effectivement vues en cours reste à vérifier.
+
+Les schémas A0_11 et A1b_16 seront des sensibilités sur les mêmes lignes
+`in_strict13`, mêmes labels et mêmes plis. Le schéma 16 n’autorise pas un filtre
+supplémentaire pour améliorer ses scores ; une absence complète dans le train
+ou une non-convergence doit être rapportée. Si le jeu d’entrées ou la famille
+de modèle est optimisé, ce choix fait partie de la recherche interne. Choisir
+le meilleur tableau externe puis annoncer son score comme une estimation
+indépendante de la sélection serait optimiste. Voir
+[l’exemple de validation imbriquée scikit-learn](https://scikit-learn.org/stable/auto_examples/model_selection/plot_nested_cross_validation_iris.html).
+
+Au moins une méthode semi-supervisée est exigée par le sujet. COREG est retenu
+comme candidat à implémenter et contrôler, pas comme méthode déjà entraînée.
+Il utilise deux régressions kNN à distances différentes et un échange de
+pseudo-labels sélectionnés ; source primaire :
+[Zhou et Li, IJCAI 2005](https://www.lamda.nju.edu.cn/publication/ijcai05.pdf).
+Les pseudo-labels ne sont pas des mesures ; aucun gain sur cette base n’est acquis.
+Protocole prévu : inductif, pools venant uniquement des groupes du train concerné (interne
 comme externe), aucun label de validation dans le fit ou les pseudo-labels.
-Comparer au pendant supervisé avec les mêmes labels d’entraînement ; documenter
-explicitement si le preprocessing utilise aussi les X non étiquetés autorisés.
+Comparer au pendant supervisé avec les mêmes labels d’entraînement et les mêmes
+deux régressions/agrégation, sans pseudo-labels, en plus du kNN simple. Pour isoler
+l’ajout de pseudo-labels, le premier protocole ajuste le preprocessing sur le
+train étiqueté uniquement, puis transforme le pool autorisé sans refit. Les
+autres propriétés connues d’une ligne du pool ne deviennent ni entrées ni labels
+de la cible manquante. Réglages et limites d’itérations de COREG restent à définir
+avant son évaluation ; ils ne sont pas déduits des scores externes.
+
+Définitions des méthodes supervisées : documentation officielle
+[Ridge](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.Ridge.html),
+[SVR](https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVR.html),
+[Random Forest](https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestRegressor.html).
 
 Exports futurs : prédictions externes par ID brut/cible/pli, métriques, effectifs,
 paramètres choisis, jeu d’entrées, imputation, seed, versions, hashes des données
@@ -211,6 +257,7 @@ restent à compléter après les expériences ; les temps réels ne sont pas inv
 | [Premier audit AI](../reports/06_ai_prepared_audit.md) | Première préparation non adoptée |
 | [Audit corrigé](../reports/07_corrected_ai_preparation_audit.md) | Huit CSV reproduits, portée et réserves scientifiques |
 | [Migration](../reports/08_notebook_migration.md) | Commits, réduction de l’EDA, suppression de src et vérifications |
+| [Plan d’expériences](../reports/09_modeling_plan.md) | Cibles, compromis d’entrées, budgets supervisés et portée de l’imputation |
 
 Les sources AI originales sont sauvegardées au commit `2ecb088` et retirées de
 l’arborescence active. Les artefacts fournis restants dans `ai_prepared/` sont des

@@ -1,7 +1,7 @@
 # Rapport intermédiaire — données et préparation avant entraînements
 
-**État vérifié au 8 octobre 2026.** Les données et le protocole de traction sont
-prêts pour le choix des modèles. Ce document prépare le rapport final demandé
+**État au 9 octobre 2026.** Les données, le protocole de traction et le premier
+portefeuille de modèles sont définis. Ce document prépare le rapport final demandé
 par le sujet ; il ne remplace pas encore les expériences réglées, la comparaison
 semi-supervisée, les informations du binôme et le Gantt.
 
@@ -104,6 +104,10 @@ max_iter=100, tol=1e-3. Les valeurs observées restent intactes ; les PWHT estim
 respectent les couples du train et les composantes observées. Colonne absente,
 non-convergence ou couple incompatible entraînent une erreur explicite.
 Le nettoyage exporte les données avant apprentissage ; la CV repart de ces tables.
+Le master garde donc ses NaN : 607 des 1 555 lignes de la cohorte ont au moins
+une entrée numérique manquante, soit 1 075 cellules. Chaque entraînement réglé
+refait son imputation dans le train du pli ; aucune table globalement imputée
+n’est nécessaire avant de commencer la validation croisée.
 
 Les 105 lignes dédupliquées sans aucune des cinq cibles sont conservées, dont
 99 dans la cohorte. Une semi-supervision inductive pourra utiliser les lignes
@@ -138,10 +142,12 @@ Leur définition et les règles de comparaison sont dans [les specs](../specs/sp
 ## Prochaine phase
 
 Le notebook `03_modeling.ipynb` charge les données vérifiées, expose les pools et
-les partitions, et prépare le choix des méthodes. Il reste à confirmer les
-méthodes du cours, définir leurs budgets, régler dans les plis internes et
-comparer sur les mêmes plis externes. Au moins une méthode semi-supervisée doit
-être choisie sur une bibliographie justifiée ; COREG reste un candidat.
+les partitions, et configure médiane de y, Ridge, SVR RBF, Random Forest et kNN.
+Les budgets sont explicités dans le [plan d’expériences](09_modeling_plan.md) et
+[les specs](../specs/spec.md). Ces configurations ne sont pas encore des pipelines
+entraînées. Il reste à vérifier leur adéquation au cours et exécuter les réglages
+internes puis les évaluations externes. COREG est le candidat semi-supervisé à
+implémenter et contrôler ; sa bibliographie n’établit aucun gain sur notre base.
 
 Les ambiguïtés d’unités/Charpy, la sensibilité aux groupes et aux jeux d’entrées,
 les erreurs de modèles et la reproduction par le binôme restent à documenter.
