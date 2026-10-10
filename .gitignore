@@ -21,6 +21,7 @@ data/processed/*
 !data/processed/.gitkeep
 models/*
 !models/.gitkeep
+!models/README.md
 
 # Local AI-supplied reference artifacts; migrated sources live in notebooks/
 ai_prepared/

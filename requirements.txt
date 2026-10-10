@@ -1,4 +1,6 @@
 numpy
+scipy
+cloudpickle
 pandas>=2.2
 scikit-learn>=1.2
 matplotlib
