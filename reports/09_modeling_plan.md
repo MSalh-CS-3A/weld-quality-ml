@@ -1,5 +1,10 @@
 # Plan d’expériences — 9 octobre 2026
 
+> Plan historique des budgets. Le notebook 03 exécute désormais les recherches
+> supervisées par groupes, avec énergie Charpy exploratoire ajoutée à la demande
+> de l’utilisateur. Voir le protocole actif dans `specs/spec.md` et les résultats
+> dans `reports/10_supervised_training.md`. COREG reste différé.
+
 Les décisions scientifiques actives sont dans [specs/spec.md](../specs/spec.md).
 Ce document précise le passage de la préparation à l’entraînement ; aucun nouveau
 score prédictif n’est annoncé. Le notebook [03_modeling](../notebooks/03_modeling.ipynb)
