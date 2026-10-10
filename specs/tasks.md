@@ -38,14 +38,39 @@ branch. This backlog does not claim that any GitHub issues or board exist yet.
 
 ## Backlog
 
-### Current technical state — 2026-10-08
+### Current technical state — 2026-10-10
 
-The three active notebooks are now `01_eda`, `02_data_preparation` and
-`03_modeling`, with analysis code directly in their cells. EDA/preparation,
+The seven active notebooks are now `01_eda`, `02_data_preparation`,
+`03_modeling`, `04_diagnostics`, `05_random_kfold`, `06_grouped_exports` and `07_coreg`,
+with analysis code directly in their cells. EDA/preparation,
 traction eligibility, grouped outer/inner splits and a fixed-parameter sensitivity
-benchmark are implemented and locally reproduced. The next work is T07 model
-choice/budgets, then T08–T10 tuning, training and supervised/semi-supervised
-comparisons. T05 tuning budgets and source/group sensitivities remain open.
+benchmark are implemented and locally reproduced. Notebook 03 now runs tuned
+supervised comparisons for three traction targets and exploratory reported Charpy
+E(T) pairs: five model families, five outer/three inner group folds, 100 outer
+evaluations and 2,440 estimator fits. Course methods are confirmed. Notebook 04 completes retrospective group/error diagnostics,
+permutation and local explainability, split controls and the six 11/13/16-feature ×
+median/iterative scenarios with the same grouped nested validation. Of 480 planned
+outer evaluations, 436 succeed; 44 are unavailable due to 11 documented iterative
+preprocessing failures. A joint inner-only selection and MAE/MSE comparison are
+also evaluated. Three Charpy source families are matched, with uncertainty kept
+explicit; 21 source groups remain unresolved. A homogeneous Charpy protocol,
+independent validation after this investigation remains open. Notebook 05 adds the requested 16-input/median random nested KFold,
+audits series/condition repetitions, compares three fixed-RF split protocols,
+exports complete pipelines and prepares row-separated inductive pools. There
+are 849/878/924 candidate unlabeled rows for traction; Charpy has no unlabeled
+example with known test temperature. Results are
+in `reports/10_supervised_training.md`, `reports/11_performance_diagnostics.md`
+`reports/12_random_kfold_training.md` and
+`reports/13_grouped_exports_and_ssl_plan.md`. Both random
+and grouped 16/median protocols now have 40 exported pipelines each, with
+fresh-process reload and OOF reproduction checks. Notebook 07 implements the
+authorized inductive COREG experiment: three traction targets, both nested CV
+protocols, internal k selection, matched/tuned supervised kNN controls and
+base43/44 sensitivity. The preprocessing is fixed on true train labels; repeated
+pool representations are deduplicated. Results are recorded in
+`reports/14_coreg_training.md`; 37 focused tests pass. COREG exports are separate
+from the earlier supervised exports. Teammate cross-review and independent
+scientific validation remain open.
 
 This technical status does not claim that both teammates completed independent
 EDA, cross-review or reproduction. Agree on owners, course methods and actual
@@ -179,13 +204,13 @@ Outcome: a distinct reproducible supervised experiment owned and explained by B.
 
 Outcome: a justified experiment that uses eligible unlabeled observations.
 
-- [ ] Implement the researched method appropriate to the chosen prediction task.
-- [ ] Enforce and document T05's inductive or transductive data-access rules.
-- [ ] Keep validation labels out of training, tuning outside inner folds, and
+- [x] Implement the researched method appropriate to the chosen prediction task.
+- [x] Enforce and document T05's inductive or transductive data-access rules.
+- [x] Keep validation labels out of training, tuning outside inner folds, and
       pseudo-label generation; fit learned preprocessing on permitted training data.
-- [ ] Compare against the relevant supervised counterpart with the same labeled
+- [x] Compare against the relevant supervised counterpart with the same labeled
       training observations and outer validation splits to assess the unlabeled contribution.
-- [ ] Record tuning, parameters, fold metrics, limitations, and reproduction steps.
+- [x] Record tuning, parameters, fold metrics, limitations, and reproduction steps.
 - [ ] Have the other teammate inspect data access and explain the method back.
 
 ### T11 — Cross-review and reproduce each other's experiments
