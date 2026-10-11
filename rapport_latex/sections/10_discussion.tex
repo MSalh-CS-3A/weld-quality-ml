@@ -1,0 +1,104 @@
+% =====================================================================
+%  10. Analyse comparative, limites et recommandations
+% =====================================================================
+\clearpage
+\section{Analyse comparative et discussion}
+\label{sec:discussion}
+
+\subsection{Vue d'ensemble des approches}
+
+Le \cref{tab:recap} rassemble, pour la limite d'élasticité, les principales
+approches évaluées au cours du projet. Les autres cibles suivent le même schéma
+(\cref{sec:resultats,sec:ssl}).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Récapitulatif des approches pour \YS{} : $R^2$ moyen sur cinq plis externes.}
+\label{tab:recap}
+\begin{tabularx}{\textwidth}{@{}L c c c@{}}
+\toprule
+Approche & Entrées / imputation & $R^2$ aléatoire & $R^2$ groupé \\
+\midrule
+Référence médiane de $y$ & -- & $-0{,}031$ & $-0{,}073$ \\
+Forêt aléatoire, premier benchmark & 13 / itérative & -- & 0,079 \\
+Forêt aléatoire & 13 / médiane & -- & 0,102 \\
+Forêt aléatoire & 16 / médiane & 0,765 & 0,390 \\
+Sélection conjointe interne (schéma, imputation, famille) & 11--16 / les deux & -- & 0,337 \\
+\textbf{Sélection interne de la famille (référence)} & \textbf{16 / médiane} & \textbf{0,755} & \textbf{0,337} \\
+$k$NN réglé & 16 / médiane & 0,619 & $-0{,}140$ \\
+COREG (semi-supervisé) & 16 / médiane & 0,629 & $-0{,}056$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Trois enseignements en découlent :
+\begin{enumerate}
+  \item \textbf{Les entrées comptent davantage que l'algorithme.} Passer de 13 à 16 entrées fait passer le $R^2$ groupé de la forêt de 0,10 à 0,39, alors que changer de famille à entrées fixées modifie beaucoup moins le score.
+  \item \textbf{Le protocole change la conclusion.} Toutes les familles apprises perdent entre 0,3 et 0,8 point de $R^2$ entre validation aléatoire et groupée ; les méthodes locales ($k$NN, COREG) deviennent même pires que la constante.
+  \item \textbf{Le semi-supervisé n'aide pas ici.} Exploiter les entrées sans label n'apporte pas l'information qui manque pour transférer entre séries.
+\end{enumerate}
+
+\subsection{Quelle approche est la plus appropriée ?}
+
+\begin{decision}
+L'approche recommandée est la \textbf{procédure supervisée 16 entrées + procédé,
+imputation médiane apprise dans le train, avec choix de la famille et des
+hyperparamètres par validation interne}. En pratique, cette procédure retient
+une \textbf{SVR RBF} ou une \textbf{forêt aléatoire} selon la cible
+(\cref{tab:modeles_finaux}) ; la forêt est la plus robuste lorsque la série est
+inconnue. COREG est conservé comme expérience semi-supervisée documentée, pas
+comme modèle de référence.
+\end{decision}
+
+Le niveau de confiance à accorder dépend toutefois de l'usage :
+\begin{itemize}
+  \item \textbf{Soudure proche d'une série déjà documentée} (même procédé, mêmes familles de composition) : l'erreur typique attendue est d'environ 30\,MPa sur \YS, 25\,MPa sur \UTS{} et 2 points d'allongement --- un ordre de grandeur utile pour pré-sélectionner des recettes avant essais.
+  \item \textbf{Soudure d'une nouvelle étude, procédé ou famille d'alliage} : l'erreur double (environ 55\,MPa sur \YS{} et \UTS) et le $R^2$ chute sous 0,35. Le modèle ne remplace pas l'essai mécanique ; il peut au mieux orienter.
+  \item \textbf{Énergie Charpy} : les prédictions restent exploratoires tant que les protocoles ne sont pas harmonisés ; elles ne doivent pas servir à une décision de ténacité.
+\end{itemize}
+
+\subsection{Limites de l'étude}
+
+\begin{itemize}
+  \item \textbf{Sélection rétrospective.} Le passage à 16/médiane a été décidé après observation des scores groupés sur ces mêmes données. Même avec une validation imbriquée ensuite, l'ensemble de la démarche n'a pas été validé sur un jeu indépendant.
+  \item \textbf{Groupes imparfaits.} Les séries sont inférées des identifiants : elles peuvent fusionner ou séparer des publications. Elles restent des approximations des vraies unités d'indépendance.
+  \item \textbf{Données hétérogènes.} Compositions incomplètes, unités douteuses en quarantaine, protocoles Charpy non harmonisés, précision de transcription inconnue.
+  \item \textbf{Entrées omises.} Des éléments exclus pour leur faible couverture (Nb, V, Ti, B, Cu\ldots) peuvent expliquer une partie des décalages entre séries.
+  \item \textbf{Incertitude.} Les intervalles rapportés sont descriptifs ; aucune prédiction n'est accompagnée d'un intervalle de prédiction calibré.
+  \item \textbf{Semi-supervisé.} Une seule méthode, un seul budget de labels (complet) ; d'autres variantes (régresseurs différents, labels rares) restent à explorer.
+\end{itemize}
+
+\subsection{Recommandations}
+\label{subsec:recommandations}
+
+L'énoncé demande nos recommandations pour obtenir une bonne qualité de soudure.
+Les modèles mettent en évidence des \emph{associations}, pas des causes : nous
+séparons donc ce que les données permettent d'affirmer de ce qui demanderait des
+essais dédiés.
+
+\paragraph{Ce que l'étude permet de recommander.}
+\begin{enumerate}
+  \item \textbf{Mesurer et enregistrer la composition complète}, y compris Ni, Cr et Mo : leur ajout réduit l'erreur de 9 à 11\,MPa sur la résistance, alors qu'ils manquent dans plus de la moitié des lignes. Une valeur mesurée vaut mieux qu'une valeur imputée.
+  \item \textbf{Documenter le traitement thermique après soudage} (température, durée) : avec la composition, c'est le bloc d'information le plus utilisé par les modèles pour prédire la résistance.
+  \item \textbf{Enregistrer les protocoles d'essai}, en particulier pour Charpy : distinguer une énergie mesurée à température imposée d'une température de transition, et conserver des courbes $E(T)$ complètes.
+  \item \textbf{Identifier les séries, éprouvettes et publications} dans les bases, afin de pouvoir valider honnêtement le transfert à de nouvelles études.
+  \item \textbf{Valider tout modèle sur de nouvelles séries} avec de vraies mesures avant un usage opérationnel, et signaler les soudures hors du domaine du train (procédé inconnu, compositions extrêmes), où l'erreur augmente nettement.
+  \item \textbf{Privilégier la diversité des études} plutôt que le nombre de lignes : les courbes d'apprentissage suggèrent que de nouvelles séries sont plus informatives que de nouvelles répétitions.
+\end{enumerate}
+
+\paragraph{Ce que l'étude ne permet pas d'affirmer.} Aucun réglage de soudage
+\og optimal \fg{}, aucun seuil universel de bonne soudure et aucun effet causal
+d'un élément ou d'un paramètre n'est démontré. Les importances indiquent
+\emph{quelles} informations le modèle utilise, pas \emph{dans quel sens} modifier
+une recette. Pour formuler des recommandations de procédé (composition cible,
+apport thermique, PWHT), il faudrait des plans d'expériences contrôlés et
+l'expertise de métallurgistes du soudage.
+
+\begin{aretenir}
+La procédure supervisée 16/médiane (SVR ou forêt aléatoire selon la cible) est
+l'approche la plus appropriée. Elle est fiable pour interpoler dans des séries
+connues, nettement moins pour de nouvelles études. Les leviers d'amélioration
+sont avant tout la \textbf{qualité et la complétude des données} : composition
+complète, PWHT, protocoles d'essai et identification des séries.
+\end{aretenir}

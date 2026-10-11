@@ -1,0 +1,149 @@
+% =====================================================================
+%  1. Introduction et problématique
+% =====================================================================
+\clearpage
+\section{Problématique et traduction en tâche d'apprentissage}
+\label{sec:intro}
+
+\subsection{Contexte industriel}
+
+Le soudage des aciers intervient dans des secteurs dont le poids économique se
+chiffre en milliards d'euros, par exemple l'assemblage des mâts et pieux
+d'éoliennes. Une soudure défaillante peut compromettre toute une structure ;
+il faut donc garantir que le métal déposé possède la résistance et la ténacité
+attendues. Aujourd'hui, la connaissance sur la qualité des soudures se transmet
+surtout d'expert à expert, ce qui rend les industriels dépendants de quelques
+spécialistes. L'énoncé du projet propose d'exploiter les données pour
+\emph{extraire et homogénéiser} cette connaissance experte, et éventuellement
+découvrir de nouveaux motifs.
+
+\subsection{Qu'est-ce que la « qualité » d'une soudure ?}
+
+La qualité n'est pas une grandeur mesurée directement dans la base. Elle se
+manifeste à travers plusieurs \emph{propriétés mécaniques} mesurées par des
+essais normalisés :
+\begin{itemize}
+  \item la \textbf{limite d'élasticité} (\YS) : contrainte à partir de laquelle le métal se déforme de façon permanente ;
+  \item la \textbf{résistance maximale à la traction} (\UTS) : contrainte maximale supportée avant la rupture ;
+  \item l'\textbf{allongement} : déformation atteinte à la rupture, qui renseigne sur la ductilité ;
+  \item l'\textbf{énergie Charpy} : énergie absorbée lors de la rupture d'une éprouvette entaillée à une température donnée, qui renseigne sur la ténacité.
+\end{itemize}
+Ces propriétés décrivent des aspects différents et parfois antagonistes : un
+métal très résistant est souvent moins ductile (\cref{subsec:eda_cibles}).
+Fusionner ces mesures en un score unique \og bon/mauvais \fg{} demanderait un
+cahier des charges (seuils par application, normes visées) que la base ne fournit
+pas.
+
+\begin{decision}
+Nous ne créons \textbf{aucune classe arbitraire} \og bonne soudure / mauvaise soudure \fg{}.
+Chaque propriété mesurée est prédite séparément, dans son unité physique. Ce choix
+conserve l'information quantitative, évite d'inventer des seuils et permet à un
+utilisateur d'appliquer ensuite ses propres critères d'acceptation.
+\end{decision}
+
+\subsection{Formulation comme problème d'apprentissage}
+
+Pour chaque propriété cible $t \in \{\YS, \UTS, \text{allongement}, \text{Charpy}\}$,
+on cherche une fonction $f_t$ qui associe aux \emph{conditions de fabrication}
+d'une soudure $\bm{x}$ (composition chimique, paramètres électriques, apport
+thermique, températures, traitement thermique, procédé) une estimation de la
+propriété $y_t$ :
+\begin{equation}
+  \hat{y}_t = f_t(\bm{x}), \qquad \bm{x} \in \mathbb{R}^{p}\times\{\text{procédés}\},\quad y_t \in \mathbb{R}.
+\end{equation}
+Il s'agit donc de \textbf{régressions supervisées}. Pour l'énergie Charpy, la
+température d'essai $T$ fait partie des entrées, car l'énergie dépend fortement
+de la température : on prédit $E(T)$.
+
+La base est \textbf{partiellement étiquetée} : une ligne peut renseigner la
+composition et le procédé sans renseigner la propriété cible. Pour chaque cible,
+on dispose ainsi d'un ensemble étiqueté $\mathcal{D}_L = \{(\bm{x}_i, y_i)\}$ et
+d'un ensemble non étiqueté $\mathcal{D}_U = \{\bm{x}_j\}$. Cette situation motive
+l'étude d'une méthode \textbf{semi-supervisée}, qui cherche à exploiter
+$\mathcal{D}_U$ en plus de $\mathcal{D}_L$ (\cref{subsec:ssl_biblio}).
+
+\begin{intuition}
+Dans un usage réel, on voudrait estimer les propriétés d'une soudure \emph{avant}
+de réaliser des essais mécaniques coûteux, à partir de sa recette (composition,
+réglages, traitement). Les entrées autorisées sont donc uniquement celles
+connues à ce moment-là : une autre propriété mécanique, la microstructure
+observée après coup ou l'identifiant de la publication ne peuvent pas servir
+d'entrée (\cref{subsec:entrees_exclues}).
+\end{intuition}
+
+\subsection{Démarche suivie}
+
+Le projet est découpé en sept notebooks autonomes, exécutés dans l'ordre. La
+\cref{fig:demarche} présente leur enchaînement et la section du rapport qui
+correspond à chacun.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  etape/.style={rectangle, rounded corners=2pt, draw=csbordeaux, line width=0.7pt,
+                fill=csgrisclair, align=center, text width=3.3cm, minimum height=1.35cm,
+                font=\footnotesize},
+  fleche/.style={-{Stealth[length=2.2mm]}, line width=0.8pt, color=csgris},
+  node distance=0.55cm and 0.45cm]
+  \node[etape] (n1) {\textbf{01 --- EDA}\\ structure, absences,\\ cibles, ACP\\ {\color{csbordeaux}\S\ref{sec:eda}}};
+  \node[etape, right=of n1] (n2) {\textbf{02 --- Préparation}\\ nettoyage, groupes,\\ cohorte, plis\\ {\color{csbordeaux}\S\ref{sec:prep}}};
+  \node[etape, right=of n2] (n3) {\textbf{03 --- Supervisé}\\ 5 familles, CV\\ groupée, 13/itérative\\ {\color{csbordeaux}\S\ref{subsec:bench13}}};
+  \node[etape, right=of n3] (n4) {\textbf{04 --- Diagnostics}\\ erreurs par série,\\ sensibilités 11/13/16\\ {\color{csbordeaux}\S\ref{sec:diag}}};
+  \node[etape, below=of n4] (n5) {\textbf{05 --- CV aléatoire}\\ 16/médiane,\\ exports\\ {\color{csbordeaux}\S\ref{subsec:res16}}};
+  \node[etape, left=of n5] (n6) {\textbf{06 --- CV groupée}\\ 16/médiane,\\ exports\\ {\color{csbordeaux}\S\ref{subsec:res16}}};
+  \node[etape, left=of n6] (n7) {\textbf{07 --- COREG}\\ semi-supervisé\\ inductif\\ {\color{csbordeaux}\S\ref{sec:ssl}}};
+  \node[etape, left=of n7, fill=white, draw=csgris] (n8) {\textbf{Synthèse}\\ comparaison,\\ recommandations\\ {\color{csbordeaux}\S\ref{sec:discussion}}};
+  \draw[fleche] (n1) -- (n2);
+  \draw[fleche] (n2) -- (n3);
+  \draw[fleche] (n3) -- (n4);
+  \draw[fleche] (n4) -- (n5);
+  \draw[fleche] (n5) -- (n6);
+  \draw[fleche] (n6) -- (n7);
+  \draw[fleche] (n7) -- (n8);
+\end{tikzpicture}
+\caption{Enchaînement des étapes du projet. Chaque boîte correspond à un notebook
+du dossier \texttt{notebooks/} ; la référence indique la section du rapport qui
+le décrit. Le diagnostic (04) a motivé le passage de la configuration initiale
+13 entrées/imputation itérative à la configuration 16 entrées/imputation médiane.}
+\label{fig:demarche}
+\end{figure}
+
+Trois principes ont guidé toutes les étapes :
+\begin{enumerate}
+  \item \textbf{Traçabilité} : les fichiers bruts ne sont jamais modifiés ; chaque transformation conserve la valeur d'origine, son statut et sa provenance.
+  \item \textbf{Absence de fuite d'information} : toute transformation apprise (moyennes, médianes, encodage, imputation, choix d'hyperparamètres) est ajustée sur le seul ensemble d'entraînement du pli considéré.
+  \item \textbf{Honnêteté des conclusions} : chaque résultat est rattaché à sa population et à son protocole ; les limites sont explicitées plutôt que masquées.
+\end{enumerate}
+
+\subsection{Organisation du dépôt}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Organisation du dépôt du projet. Les données brutes, les données dérivées
+et les modèles sont produits localement et ne sont pas versionnés.}
+\label{tab:depot}
+\begin{tabularx}{\textwidth}{@{}l L@{}}
+\toprule
+Élément & Rôle \\
+\midrule
+\fichier{sujet.md}                   & Énoncé original, conservé tel quel \\
+\fichier{specs/spec.md}              & Décisions scientifiques et justifications (protocole actif) \\
+\fichier{scripts/download\_data.py}  & Téléchargement autonome et vérification SHA-256 de l'archive Cambridge \\
+\fichier{notebooks/01\ldots07}       & Code d'analyse, de préparation, d'entraînement et d'évaluation \\
+\fichier{data/raw/}                  & Fichiers sources inchangés (\texttt{welddb.data}, \texttt{.info}, \texttt{.tex}) \\
+\fichier{data/processed/}            & Exports dérivés : table maître, provenance, plis, scores, prédictions \\
+\fichier{models/}                    & 188 pipelines complètes sérialisées avec leurs métadonnées \\
+\fichier{reports/}                   & Rapports intermédiaires (01 à 16) et figures historiques \\
+\fichier{tests/}                     & 37 tests ciblés hors ligne \\
+\fichier{rapport\_latex/}            & Le présent rapport et le script de génération de ses figures \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{aretenir}
+La qualité d'une soudure est représentée par quatre propriétés mécaniques
+mesurées. Le problème devient quatre \textbf{régressions supervisées}
+indépendantes, sur des données \textbf{partiellement étiquetées} --- ce qui
+justifie une étude semi-supervisée complémentaire.
+\end{aretenir}

@@ -21,6 +21,7 @@ data/processed/modeling/       exports reproductibles, ignorés par Git
 data/processed/experiments/    scores, prédictions et recherches, ignorés par Git
 models/                       pipelines complètes et métadonnées locales, ignorées par Git
 reports/                      analyses, rapport intermédiaire et figures
+rapport_latex/                rapport complet en LaTeX et script de ses figures
 specs/                        protocole et organisation du binôme
 tests/                        contrôles ciblés des notebooks et du téléchargement
 ```
@@ -120,6 +121,8 @@ Deux documents en français regroupent les travaux pour lecture :
 et [le rapport du projet, version 1](reports/16_rapport_projet_v1_fr.md).
 Ce dernier est aussi disponible en
 [PDF de cinq pages](output/pdf/rapport_projet_v1_fr.pdf).
+Le [rapport complet en LaTeX](rapport_latex/README.md) détaille toutes les
+étapes, de l'EDA à l'analyse des résultats d'entraînement.
 Les trois auteurs sont renseignés ; le numéro d'équipe, les dates, les
 responsabilités et les heures réelles du Gantt restent à compléter.
 

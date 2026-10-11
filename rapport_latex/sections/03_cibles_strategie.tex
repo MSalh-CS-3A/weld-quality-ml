@@ -1,0 +1,147 @@
+% =====================================================================
+%  3. Variables cibles et stratégie de prédiction
+% =====================================================================
+\clearpage
+\section{Variables cibles et stratégie de prédiction}
+\label{sec:cibles}
+
+\subsection{Quelles variables représentent la qualité ?}
+
+À partir de l'EDA, nous retenons comme \textbf{cibles principales} les trois
+propriétés de traction --- \YS, \UTS{} et allongement --- et comme \textbf{cible
+exploratoire} l'énergie Charpy à température d'essai connue. Le
+\cref{tab:cibles} justifie ce choix et donne les effectifs à chaque étape du
+filtrage décrit en \cref{sec:prep}.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Cibles retenues et effectifs de labels. \og Cohorte \fg{} désigne la
+population de modélisation de 1\,555 lignes (\cref{subsec:cohorte}) ;
+\og Groupes \fg{} le nombre de séries inférées portant au moins un label.}
+\label{tab:cibles}
+\begin{tabularx}{\textwidth}{@{}l l r r r r L@{}}
+\toprule
+Cible & Unité & Brut & Dédupl. & Cohorte & Groupes & Rôle et justification \\
+\midrule
+\YS           & MPa & 780 & 777 & 706 & 40 & Principale : propriété de dimensionnement, bonne couverture \\
+\UTS          & MPa & 738 & 735 & 677 & 39 & Principale : résistance, complémentaire de \YS \\
+Allongement   & \%  & 700 & 697 & 631 & 34 & Principale : ductilité, opposée à la résistance \\
+Énergie \charpy & J & 879 & 877 & 861 & 24 & Exploratoire : protocoles hétérogènes (\cref{subsec:charpy_strategie}) \\
+\midrule
+Réduction de section & \% & 705 & 702 & 635 & -- & Complémentaire, non entraînée \\
+Dureté        & kg/mm$^2$ & 138 & -- & -- & -- & Écartée : 80 valeurs exactes, protocoles Vickers mélangés \\
+FATT50        & ?   & 31  & -- & -- & -- & Écartée : 31 valeurs, unité non documentée \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Les distributions des cibles dans la cohorte sont résumées au \cref{tab:stats_cibles}.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Statistiques des cibles dans la cohorte de modélisation.}
+\label{tab:stats_cibles}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+Cible & Labels & Médiane & Minimum & Maximum \\
+\midrule
+\YS{} (MPa)              & 706 & 496,0 & 315,0 & 920,0 \\
+\UTS{} (MPa)             & 677 & 576,0 & 447,0 & 1\,151,0 \\
+Allongement (\%)         & 631 & 26,6  & 10,6  & 36,4 \\
+Énergie \charpy{} (J)    & 861 & 100,0 & 3,0   & 270,0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Pourquoi des régressions séparées ?}
+
+Dans la cohorte, seules \textbf{609 lignes} renseignent simultanément les trois
+propriétés de traction et \textbf{141} les quatre cibles. Un modèle
+multi-sorties exigeant les trois propriétés de traction perdrait 14\,\% des
+labels de \YS ; exiger les quatre cibles ne conserverait que 16 à 22\,\% des
+labels selon la cible. Il faudrait sinon imputer des cibles, ce qui reviendrait
+à entraîner sur des valeurs inventées.
+
+\begin{decision}
+Chaque cible dispose de \textbf{son propre modèle et de ses propres lignes
+d'entraînement} : on apprend la cible $t$ sur toutes les lignes qui renseignent
+$t$, sans exiger les autres. Une cible absente reste inconnue et
+\textbf{n'est jamais imputée}. Aucune propriété mécanique n'est utilisée comme
+entrée pour en prédire une autre, car elle ne serait pas disponible au moment
+d'estimer une soudure non encore testée.
+\end{decision}
+
+\subsection{Le cas particulier de l'énergie Charpy}
+\label{subsec:charpy_strategie}
+
+Deux formulations sont possibles pour la ténacité : prédire l'énergie $E$ à une
+température $T$ donnée, ou prédire la température $T_{100\,\mathrm{J}}$ (ou
+$T_{28\,\mathrm{J}}$) à laquelle l'énergie atteint un seuil. Nous retenons la
+première, \textbf{$E(T)$ avec la température d'essai en entrée}, formulation
+utilisée par des travaux de référence sur cette famille de données~\cite{bhadeshia_1995,cool_1996}.
+La température n'est jamais reconstruite : seules les 861 lignes de la cohorte
+où elle est connue sont utilisées.
+
+\begin{precaution}
+La documentation définit bien deux colonnes distinctes (température en °C,
+énergie en J), mais pas le protocole de chaque ligne. Une partie des couples
+correspond probablement à des températures de transition à 28 ou 100\,J
+(\cref{fig:charpy}), une autre à des courbes $E(T)$ complètes. Aucun seuil
+28/100\,J ne sert à exclure automatiquement des lignes : cette tâche est traitée
+comme \textbf{exploratoire} et les sources ont été auditées a posteriori
+(\cref{subsec:charpy_audit}).
+\end{precaution}
+
+\subsection{Entrées autorisées et entrées exclues}
+\label{subsec:entrees_exclues}
+
+Une variable n'est utilisée en entrée que si elle serait connue \emph{avant}
+l'essai mécanique, dans un usage réaliste du modèle. Le \cref{tab:entrees_exclues}
+résume cette règle.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Entrées autorisées et exclues des modèles.}
+\label{tab:entrees_exclues}
+\begin{tabularx}{\textwidth}{@{}l L@{}}
+\toprule
+Statut & Variables et raison \\
+\midrule
+\textbf{Autorisées} & Composition (C, Si, Mn, S, P, Ni, Cr, Mo, O, N), courant, tension, apport thermique, température entre passes, température et durée PWHT, procédé ; pour Charpy uniquement : température d'essai. \\
+\addlinespace
+Exclues (fuite) & Autres propriétés mécaniques, dureté, FATT50 : mesurées après l'essai, indisponibles pour une soudure nouvelle. \\
+Exclues (fuite) & Identifiant, série, groupe, numéro de pli, drapeaux d'éligibilité : ils renseigneraient sur la source et non sur la soudure. \\
+Exclues (disponibilité) & Microstructure : observée après soudage, 89 à 98 valeurs par colonne seulement. \\
+Exclues (fiabilité) & V, Cu, Co, W, Ti, Al, B, Nb, Sn, As, Sb : couverture faible, censures nombreuses ou unités douteuses. Cette exclusion ne signifie pas que ces éléments n'ont pas d'effet métallurgique. \\
+Non utilisées & Type de courant et polarité : conservés dans la table maître (modalité \texttt{missing} si non rapportés), non retenus dans les schémas d'entrées. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Stratégie d'ensemble}
+
+La stratégie de prédiction se déroule en cinq temps :
+\begin{enumerate}
+  \item \textbf{Construire une population fiable} : nettoyage déterministe, déduplication, groupes de séries et cohorte avec peu d'entrées manquantes (\cref{sec:prep}).
+  \item \textbf{Fixer une référence minimale} : prédire la médiane de $y$ du train, sans utiliser $\bm{x}$. Tout modèle doit faire mieux.
+  \item \textbf{Comparer des familles de modèles vues en cours}, du linéaire régularisé (Ridge) aux méthodes non linéaires (SVR, forêt aléatoire, $k$NN), avec réglage des hyperparamètres par validation croisée \textbf{imbriquée} (\cref{sec:methodes,sec:protocole}).
+  \item \textbf{Évaluer selon deux usages} : interpolation dans des séries connues (découpage aléatoire) et transfert à de nouvelles séries (découpage groupé).
+  \item \textbf{Exploiter les lignes non étiquetées} avec une méthode semi-supervisée (COREG), comparée à son exact pendant supervisé.
+\end{enumerate}
+
+Les lignes de la cohorte sans la cible forment le \textbf{pool non étiqueté} de
+cette cible : 849 lignes pour \YS, 878 pour \UTS{} et 924 pour l'allongement.
+Pour Charpy, \textbf{aucune} ligne de la cohorte n'a une température d'essai
+connue sans énergie : le pool naturel est vide, et aucune température n'est
+fabriquée pour en créer un.
+
+\begin{aretenir}
+Quatre régressions indépendantes : \YS, \UTS, allongement (principales) et
+énergie Charpy $E(T)$ (exploratoire). Les entrées sont limitées à ce qui est
+connu avant l'essai ; aucune cible n'est imputée ni utilisée comme entrée. Les
+lignes sans cible alimentent l'étude semi-supervisée pour les trois cibles de
+traction.
+\end{aretenir}

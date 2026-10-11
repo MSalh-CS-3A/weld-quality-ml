@@ -1,0 +1,153 @@
+% =====================================================================
+%  Préambule du rapport — compatible pdfLaTeX (Overleaf) et XeLaTeX
+% =====================================================================
+
+% ---------- Encodage et polices -------------------------------------
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{lmodern}
+  \usepackage{textcomp}
+\else
+  \usepackage{fontspec}
+\fi
+\usepackage[french]{babel}
+% Légendes « Figure »/« Tableau » sans petites capitales (absentes en gras).
+\ifdefined\frenchsetup\frenchsetup{SmallCapsFigTabCaptions=false}\fi
+\AtBeginDocument{\renewcommand{\figurename}{Figure}\renewcommand{\tablename}{Tableau}%
+  \renewcommand{\listtablename}{Liste des tableaux}}
+\usepackage{microtype}
+
+% ---------- Mise en page --------------------------------------------
+\usepackage[a4paper,margin=2.3cm,headheight=28pt,includehead,includefoot]{geometry}
+\usepackage{setspace}
+\setstretch{1.08}
+\usepackage{parskip}
+\setlength{\emergencystretch}{2.5em} % évite les débordements de lignes
+\setlength{\parskip}{0.55em}
+\usepackage{enumitem}
+\setlist{itemsep=0.15em,topsep=0.3em}
+
+% ---------- Couleurs (charte CentraleSupélec, d'après le logo) ------
+\usepackage[table]{xcolor}
+\definecolor{csbordeaux}{HTML}{7C2E40}
+\definecolor{csgris}{HTML}{6F6A7E}
+\definecolor{csgrisclair}{HTML}{F2F1F4}
+\definecolor{bleuviz}{HTML}{2A78D6}
+\definecolor{orangeviz}{HTML}{EB6834}
+\definecolor{vertviz}{HTML}{1BAF7A}
+\definecolor{encre}{HTML}{0B0B0B}
+\definecolor{encre2}{HTML}{52514E}
+\definecolor{alerte}{HTML}{C0392B}
+
+% ---------- Titres de sections --------------------------------------
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\color{csbordeaux}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\color{csbordeaux!85!black}}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\color{csgris!80!black}}{\thesubsubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.7em}
+\titlespacing*{\subsection}{0pt}{1.1em}{0.4em}
+\titlespacing*{\subsubsection}{0pt}{0.9em}{0.3em}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{2}
+
+% ---------- Mathématiques -------------------------------------------
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{icomma} % virgule décimale en mode mathématique : $0,755$
+\usepackage{bm}
+
+% ---------- Tableaux ------------------------------------------------
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{longtable}
+\usepackage{makecell}
+\renewcommand{\arraystretch}{1.15}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\newcommand{\meilleur}[1]{\textbf{#1}}
+
+% ---------- Figures, légendes ---------------------------------------
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{float}
+\usepackage[font=small,labelfont={bf,color=csbordeaux},labelsep=period,
+            justification=justified,singlelinecheck=true]{caption}
+\usepackage{subcaption}
+\captionsetup[table]{position=top,skip=4pt}
+\captionsetup[figure]{skip=6pt}
+
+% ---------- Dessins (schémas, Gantt) --------------------------------
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc,
+                decorations.pathreplacing,backgrounds,babel}
+\usepackage{pgfgantt}
+\usepackage{eso-pic} % bandeaux de la page de garde
+
+% ---------- Algorithmes ---------------------------------------------
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\floatname{algorithm}{Algorithme}
+\renewcommand{\algorithmicrequire}{\textbf{Entrées :}}
+\renewcommand{\algorithmicensure}{\textbf{Sortie :}}
+\renewcommand{\algorithmicfor}{\textbf{pour}}
+\renewcommand{\algorithmicdo}{\textbf{faire}}
+\renewcommand{\algorithmicwhile}{\textbf{tant que}}
+\renewcommand{\algorithmicif}{\textbf{si}}
+\renewcommand{\algorithmicthen}{\textbf{alors}}
+\renewcommand{\algorithmicelse}{\textbf{sinon}}
+\renewcommand{\algorithmicend}{\textbf{fin}}
+\renewcommand{\algorithmicreturn}{\textbf{retourner}}
+
+% ---------- Encadrés pédagogiques -----------------------------------
+\usepackage[most]{tcolorbox}
+\tcbset{enhanced,breakable,boxrule=0.5pt,arc=1.5mm,left=2mm,right=2mm,
+        top=1.2mm,bottom=1.2mm,fonttitle=\bfseries\small,fontupper=\small}
+\newtcolorbox{aretenir}[1][]{colback=csgrisclair,colframe=csbordeaux,
+  title={À retenir},#1}
+\newtcolorbox{decision}[1][]{colback=white,colframe=csgris,
+  title={Décision et justification},#1}
+\newtcolorbox{intuition}[1][]{colback=bleuviz!5,colframe=bleuviz!70!black,
+  title={Intuition},#1}
+\newtcolorbox{precaution}[1][]{colback=orangeviz!6,colframe=orangeviz!80!black,
+  title={Précaution d'interprétation},#1}
+
+% ---------- Éléments à compléter par l'équipe -----------------------
+% \acompleter{texte} affiche « [À compléter : texte] » ; \acompleter{} affiche « [À compléter] ».
+\newcommand{\acompleter}[1]{\textcolor{alerte}{\textbf{[À compléter\if\relax\detokenize{#1}\relax\else\ : #1\fi]}}}
+
+% ---------- Notations récurrentes -----------------------------------
+\newcommand{\YS}{YS}
+\newcommand{\UTS}{UTS}
+\newcommand{\Rdeux}{$R^2$}
+\newcommand{\charpy}{Charpy$^{*}$}
+\newcommand{\fichier}[1]{\texttt{\small #1}}
+\newcommand{\ident}[1]{{\small\path{#1}}} % identifiant long, sécable aux / et -
+\newcommand{\notebook}[1]{\texttt{\small notebooks/#1}}
+
+% ---------- En-têtes et pieds de page -------------------------------
+\usepackage{lastpage}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\raisebox{-0.25\height}{\includegraphics[height=17pt]{logo-centralesupelec}}}
+\fancyhead[R]{\small\color{csgris}\TitreCourt}
+\fancyfoot[C]{\small\color{csgris}Page \thepage\ sur \pageref*{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{csbordeaux}\leaders\hrule height \headrulewidth\hfill}}
+
+% ---------- Bibliographie -------------------------------------------
+\usepackage[numbers,sort&compress]{natbib}
+\setlength{\bibsep}{0.35em}
+
+% ---------- Liens (en dernier) --------------------------------------
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=csbordeaux,citecolor=csbordeaux,
+            urlcolor=bleuviz!80!black,pdfauthor={\AuteursPDF},pdftitle={\TitreRapport}}
+\usepackage[french,nameinlink,noabbrev]{cleveref}
+\crefname{algorithm}{algorithme}{algorithmes}
+\Crefname{algorithm}{Algorithme}{Algorithmes}
+\urlstyle{same}

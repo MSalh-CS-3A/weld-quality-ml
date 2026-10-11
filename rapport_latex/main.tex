@@ -1,0 +1,59 @@
+% =====================================================================
+%  Rapport complet du projet « Prédiction de la qualité des soudures »
+%  Compilation : pdflatex main → bibtex main → pdflatex main ×2
+%  (ou latexmk -pdf main.tex ; ou tectonic main.tex)
+% =====================================================================
+\documentclass[11pt,a4paper]{article}
+
+\input{informations}
+\input{preambule}
+
+\begin{document}
+
+\pagenumbering{Alph}
+\input{page_de_garde}
+\pagenumbering{arabic}
+
+% ---------- Pages liminaires ----------------------------------------
+\input{sections/00_resume}
+
+\clearpage
+\tableofcontents
+\vspace{1em}
+\listoffigures
+\listoftables
+\clearpage
+
+% ---------- Corps du rapport ----------------------------------------
+\input{sections/01_introduction}
+\input{sections/02_eda}
+\input{sections/03_cibles_strategie}
+\input{sections/04_preparation}
+\input{sections/05_methodes}
+\input{sections/06_protocole}
+\input{sections/07_resultats_supervises}
+\input{sections/08_diagnostics}
+\input{sections/09_semi_supervise}
+\input{sections/10_discussion}
+\input{sections/11_conclusion}
+\input{sections/12_organisation}
+
+% ---------- Bibliographie -------------------------------------------
+\clearpage
+\phantomsection
+\addcontentsline{toc}{section}{Références bibliographiques}
+\bibliographystyle{unsrtnat}
+\renewcommand{\bibname}{Références bibliographiques}
+\renewcommand{\refname}{Références bibliographiques}
+\bibliography{references}
+
+% ---------- Annexes -------------------------------------------------
+\clearpage
+\appendix
+\renewcommand{\thesection}{\Alph{section}}
+\input{annexes/A_variables}
+\input{annexes/B_reproductibilite}
+\input{annexes/C_tableaux_complementaires}
+\input{annexes/D_glossaire}
+
+\end{document}

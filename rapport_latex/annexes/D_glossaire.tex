@@ -1,0 +1,30 @@
+% =====================================================================
+%  Annexe D — Glossaire
+% =====================================================================
+\section{Glossaire}
+\label{annexe:glossaire}
+
+\begin{description}[leftmargin=0pt,itemsep=0.35em,font=\bfseries\color{csbordeaux}]
+  \item[Apport thermique] Énergie électrique fournie par unité de longueur de soudure (kJ/mm) ; dépend du courant, de la tension et de la vitesse de soudage.
+  \item[Biais d'une série] Erreur moyenne (prédit $-$ observé) des observations d'une même série ; un biais non nul signifie que le modèle se trompe de niveau pour toute la série.
+  \item[Bootstrap par groupes] Rééchantillonnage avec remise des séries (et non des lignes) pour estimer la variabilité d'un indicateur lorsque les lignes d'une série sont dépendantes.
+  \item[Censure] Valeur rapportée seulement comme inférieure à une limite de détection (\texttt{<L}).
+  \item[Charpy (essai)] Essai de choc sur éprouvette entaillée mesurant l'énergie absorbée à la rupture (J) à une température donnée ; renseigne sur la ténacité.
+  \item[Cohorte] Population de lignes retenue pour la modélisation (ici : au plus deux entrées manquantes sur 13, sans doublon).
+  \item[COREG] Méthode de co-apprentissage pour la régression : deux $k$NN s'échangent des pseudo-labels choisis par réduction locale d'erreur.
+  \item[Fuite d'information] Utilisation, pendant l'apprentissage, d'une information issue des données de validation ; elle rend les scores optimistes.
+  \item[GroupKFold] Validation croisée qui place toutes les observations d'un même groupe dans le même pli.
+  \item[Imputation] Remplacement d'une entrée manquante par une valeur estimée (médiane, régression itérative\ldots) ; ce n'est pas une mesure.
+  \item[Inductif / transductif] Un protocole semi-supervisé est inductif s'il n'utilise jamais les entrées de validation pendant l'apprentissage, transductif s'il les exploite sans leurs labels.
+  \item[MAE, RMSE, $R^2$] Erreur absolue moyenne, racine de l'erreur quadratique moyenne, coefficient de détermination (\cref{subsec:metriques}).
+  \item[OOF (\emph{out-of-fold})] Prédiction faite pour une observation par le modèle du pli où elle était en validation ; l'ensemble des OOF couvre chaque label une fois.
+  \item[Pipeline] Enchaînement d'étapes de prétraitement et d'un estimateur, ajusté en bloc sur le train puis appliqué tel quel à de nouvelles données.
+  \item[Pli (\emph{fold})] Partie des données tenue à l'écart pour l'évaluation pendant une itération de validation croisée.
+  \item[Pool non étiqueté] Lignes qui ne renseignent pas la cible, utilisables par une méthode semi-supervisée.
+  \item[Pseudo-label] Valeur de cible estimée par un modèle et ajoutée comme label ; ce n'est pas une mesure.
+  \item[PWHT] Traitement thermique après soudage (\emph{post-weld heat treatment}), caractérisé par une température et une durée.
+  \item[Série inférée] Groupe d'observations issues d'une même étude, déduit des identifiants ; utilisé pour la validation groupée.
+  \item[Standardisation] Transformation $z = (x - \mu)/\sigma$ qui met les variables à la même échelle.
+  \item[Validation croisée imbriquée] Validation à deux niveaux : la boucle interne règle le modèle, la boucle externe l'évalue sur des données jamais utilisées pour le régler.
+  \item[\YS, \UTS] Limite d'élasticité et résistance maximale à la traction (MPa).
+\end{description}
