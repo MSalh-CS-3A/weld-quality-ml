@@ -1,0 +1,36 @@
+# Python & Jupyter
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints/
+.venv/
+env/
+
+# Fichiers bruts volumineux et archives (le lien officiel est documenté dans data/README.md)
+welddb.tar
+welddb_extracted/
+data_projet.xlsx
+
+# Scripts utilitaires de génération interne
+build_notebook.py
+generate_experiments.py
+
+# Fichiers d'examen individuel (ne doivent pas être poussés sur le projet partagé)
+Examen_individuel.pdf
+reponses_examen_individuel.tex
+Sujet-soudures (1).docx
+
+# Compilation LaTeX (fichiers auxiliaires et temporaires)
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Système / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
