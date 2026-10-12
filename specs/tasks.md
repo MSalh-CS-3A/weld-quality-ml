@@ -268,3 +268,11 @@ actualisés et rapport 17 ajouté. Les historiques 13/itérative et COREG
 sont préservés. Revue croisée et validation scientifique indépendante
 restent ouvertes ; aucun temps humain n’est inféré.
 
+### Seuils et validation — 12 octobre 2026
+
+Recherche normative (ISO 2560-A, ISO 18275-A, AWS A5.1, DNV, JCGM 106) et
+choix de l'utilisateur : profil ISO 2560-A E 42 2, k = 2. Le notebook 09
+applique la règle VALIDÉ / PARTIEL / NON VALIDÉ aux mesures et aux prédictions
+hors pli des deux protocoles (sélection à six familles) ; 47 tests passent.
+Rapport 18 ajouté. Le traitement de la borne haute d'UTS reste à arbitrer :
+avec k = 2, elle empêche tout VALIDÉ prédit.

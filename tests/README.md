@@ -75,3 +75,10 @@ sur MAE interne malgré un classement externe différent, sérialisation et
 température Charpy obligatoire, moyenne de plis distincte des métriques OOF.
 Le benchmark réel et les 88 rechargements indépendants sont décrits dans
 [le rapport 17](../reports/17_xgboost_training.md).
+
+Le notebook 09 ajoute six tests de validation, soit **47 tests rapides** :
+bandes de garde des bornes basse et haute, règle monotone sur un couple Charpy
+mesuré, agrégation critiques/informatifs, bande k × RMSE par cible et comptage
+des fausses acceptations, choix d'un pli dont le modèle n'a pas vu la ligne,
+température Charpy imposée à la prédiction. L'évaluation réelle est décrite
+dans [le rapport 18](../reports/18_seuils_validation_fr.md).

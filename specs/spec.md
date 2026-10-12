@@ -802,3 +802,33 @@ pour l'allongement aléatoire (2,054 → 2,064), UTS groupé (54,344 → 55,691)
 et Charpy groupé (35,752 → 36,267). Ces choix proviennent des scores internes,
 sans correction après lecture des validations externes.
 
+## Seuils normatifs et validation — retenus le 12 octobre 2026
+
+Une recherche normative définit des seuils par cible et une règle de validation
+à trois états ; détails, sources et résultats dans
+[18_seuils_validation_fr.md](../reports/18_seuils_validation_fr.md). Les seuils
+sont repris de normes de classification du métal fondu (ISO 2560-A, ISO 18275-A,
+AWS A5.1) et de règles offshore DNV ; ils ne créent pas de score universel.
+**Choix de l'utilisateur : profil ISO 2560-A E 42 2 et k = 2.** Critères :
+YS ≥ 420 MPa, UTS ≥ 500 MPa, A ≥ 20 %, KV moyen ≥ 47 J à −20 °C, critiques ;
+UTS ≤ 640 MPa informative (mène au plus à PARTIEL), selon les recommandations
+du rapport 18.
+
+Règle : statut C / I / NC par critère avec bande de garde w = k·u (JCGM 106
+§8.3) ; VALIDÉ si tous les critères sont C, NON VALIDÉ si un critère critique
+est NC, PARTIEL sinon. u = RMSE hors pli réunie de la sélection interne à six
+familles (notebook 08), propre à chaque protocole et cible. Mesures : w = 0 ;
+KV mesuré tranché par une règle monotone sur l'unique couple E(T). Modèles :
+chaque ligne de la cohorte strict13 est prédite par le modèle externe qui ne
+l'a pas vue (ni sa série en groupé) ; KV est prédit à −20 °C. Les refits
+complets ne servent pas à cette évaluation.
+
+Implémentation : `notebooks/09_validation.ipynb`, six tests dans
+`tests/test_validation.py`, exports locaux `salh_validation_v1/`. Sur 1 555
+lignes : mesures 51 VALIDÉ / 1 274 PARTIEL / 230 NON VALIDÉ ; modèle aléatoire
+0 / 1 538 / 17 ; modèle groupé 0 / 1 555 / 0. Avec k = 2, la fourchette d'UTS
+est plus étroite que deux bandes de garde : le modèle ne peut prononcer aucun
+VALIDÉ. Les fausses acceptations par critère restent ≤ 2,3 % dans les deux
+protocoles (vérification rétrospective sur les mêmes données). Le traitement
+de la borne haute d'UTS reste à rediscuter avec l'utilisateur (sensibilités
+au §7.4 du rapport).

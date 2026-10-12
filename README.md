@@ -15,6 +15,7 @@ notebooks/
   06_grouped_exports.ipynb     export groupé 16/médiane et contrôle des prédictions
   07_coreg.ipynb               COREG inductif, contrôles kNN, deux validations et exports
   08_xgboost.ipynb             XGBoost, benchmarks six familles, refits et audits
+  09_validation.ipynb          seuils ISO 2560-A E 42 2, validation à trois états (k = 2)
 scripts/download_data.py      téléchargement autonome et checksum SHA-256
 requirements.txt              dépendances des notebooks
 data/raw/                     fichiers d’origine préservés, ignorés par Git
@@ -43,7 +44,7 @@ python scripts/download_data.py
 python -m jupyterlab
 ```
 
-Choisir le noyau de `.venv`, puis exécuter **01 → 02 → 03 → 04 → 05 → 06 → 07 → 08**, de haut en bas.
+Choisir le noyau de `.venv`, puis exécuter **01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09**, de haut en bas.
 Si nécessaire, enregistrer le noyau :
 
 ```bash
@@ -123,6 +124,11 @@ et nouvel index `models/salh_xgboost_v1/selected_models.json`. Les résultats
 historiques sont préservés ; 88 nouveaux exports sont rechargés et vérifiés.
 La suite comprend 41 tests. Voir [les résultats XGBoost](reports/17_xgboost_training.md).
 
+Le notebook 09 applique le profil ISO 2560-A E 42 2 avec une bande de garde
+k = 2 (VALIDÉ / PARTIEL / NON VALIDÉ) aux mesures et aux prédictions hors pli
+des deux validations. Les seuils, sources et résultats sont dans
+[le rapport 18](reports/18_seuils_validation_fr.md). La suite comprend 47 tests.
+
 Deux documents en français regroupent les travaux pour lecture :
 [la synthèse globale des résultats](reports/15_synthese_globale_resultats_fr.md)
 et [le rapport du projet, version 1](reports/16_rapport_projet_v1_fr.md).
@@ -148,7 +154,7 @@ python -m unittest discover -s tests -v
 Les tests sont hors ligne : archives, statuts de mesure, doublons, groupes,
 statistiques du train, préservation des observations, erreurs PWHT,
 non-convergence, recherches imbriquées et échelle des cibles. Les définitions
-testées sont chargées directement depuis les notebooks 02 à 07. Les
+testées sont chargées directement depuis les notebooks 02 à 09. Les
 contrôles du notebook 05 couvrent aussi les accès inductifs, les médianes apprises
 dans les trains et la persistance des pipelines.
 Les contrôles COREG vérifient aussi le calcul exact du gain local, les transferts
