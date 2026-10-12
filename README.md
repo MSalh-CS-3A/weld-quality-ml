@@ -129,15 +129,15 @@ k = 2 (VALIDÉ / PARTIEL / NON VALIDÉ) aux mesures et aux prédictions hors pli
 des deux validations. Les seuils, sources et résultats sont dans
 [le rapport 18](reports/18_seuils_validation_fr.md). La suite comprend 47 tests.
 
-Deux documents en français regroupent les travaux pour lecture :
-[la synthèse globale des résultats](reports/15_synthese_globale_resultats_fr.md)
-et [le rapport du projet, version 1](reports/16_rapport_projet_v1_fr.md).
-Ce dernier est aussi disponible en
-[PDF de cinq pages du 10 octobre, antérieur à XGBoost](output/pdf/rapport_projet_v1_fr.pdf).
+Le **rapport de synthèse** destiné à l'évaluation (10 pages) est
+[`output/pdf/rapport_synthese_fr.pdf`](output/pdf/rapport_synthese_fr.pdf),
+compilé depuis [`rapport_latex/rapport_final.tex`](rapport_latex/rapport_final.tex).
 Le [rapport complet en LaTeX](rapport_latex/README.md)
 ([PDF](output/pdf/rapport_complet_fr.pdf)) détaille toutes les étapes, de l'EDA
 à la validation des soudures, XGBoost compris. Il ne comporte ni numéro d'équipe
-ni section d'organisation (Gantt, répartition des tâches).
+ni section d'organisation (Gantt, répartition des tâches). Les documents
+markdown [15](reports/15_synthese_globale_resultats_fr.md) et
+[16](reports/16_rapport_projet_v1_fr.md) restent comme historique.
 
 L’EDA conserve une ACP descriptive sur les onze entrées complètes, sans
 imputation. Les anciens essais détaillés sont dans les rapports historiques

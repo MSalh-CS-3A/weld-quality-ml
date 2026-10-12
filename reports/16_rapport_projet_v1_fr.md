@@ -1,5 +1,8 @@
 # Prédiction des propriétés mécaniques de soudures d’acier
 
+> Version historique, remplacée par le rapport de synthèse LaTeX
+> ([`output/pdf/rapport_synthese_fr.pdf`](../output/pdf/rapport_synthese_fr.pdf)).
+
 **Rapport du projet - version actualisée pour relecture - 12 octobre 2026**
 
 **Auteurs : Mohamed SALH, Mohamed CHEBLI et Idriss BEN LETAIFA.**

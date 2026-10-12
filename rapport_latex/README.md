@@ -1,4 +1,14 @@
-# Rapport complet en LaTeX
+# Rapports en LaTeX
+
+Deux documents partagent le préambule, les figures et la bibliographie :
+
+- `main.tex` : rapport complet, détaillé ;
+- `rapport_final.tex` : **rapport de synthèse de 10 pages destiné à l'évaluation**
+  (problématique, base et ACP, cibles, préparation, méthodes dont COREG, métriques,
+  résultats comparés, seuils normatifs, discussion, recommandations, références).
+  PDF compilé : [`output/pdf/rapport_synthese_fr.pdf`](../output/pdf/rapport_synthese_fr.pdf).
+
+## Rapport complet
 
 Rapport détaillé du projet, de l'analyse exploratoire à l'analyse des résultats
 d'entraînement (EDA, préparation, modélisation, validation croisée, résultats
@@ -26,6 +36,7 @@ pdfLaTeX (Overleaf par défaut), XeLaTeX ou Tectonic conviennent :
 
 ```bash
 cd rapport_latex
+tectonic rapport_final.tex     # rapport de synthèse
 latexmk -pdf main.tex          # ou : pdflatex main && bibtex main && pdflatex main && pdflatex main
 # ou : tectonic main.tex
 ```

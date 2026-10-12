@@ -701,7 +701,9 @@ La [synthèse globale en français](../reports/15_synthese_globale_resultats_fr.
 consolide les résultats supervisés, les diagnostics et COREG, en distinguant
 le benchmark initial 13/itérative des procédures actuelles 16/médiane.
 La [première version du rapport du projet](../reports/16_rapport_projet_v1_fr.md)
-est accompagnée d'un [PDF de cinq pages](../output/pdf/rapport_projet_v1_fr.pdf).
+est remplacée le 12 octobre par le rapport de synthèse LaTeX de 10 pages
+(`rapport_latex/rapport_final.tex`, `output/pdf/rapport_synthese_fr.pdf`) ;
+l'ancien PDF de cinq pages est retiré du dépôt.
 Les tableaux sont issus des CSV exécutés ; l'ACP reste descriptive et les
 limites de la validation rétrospective et de Charpy sont explicites.
 
