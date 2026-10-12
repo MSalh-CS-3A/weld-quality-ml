@@ -1,5 +1,9 @@
 # KFold aléatoire 16/médiane, sens des groupes et modèles exportés
 
+> Actualisation du 12 octobre 2026 : XGBoost est ajouté aux benchmarks
+> 16/médiane dans le [rapport 17](17_xgboost_training.md). Les chiffres de
+> l’exécution du 10 octobre ci-dessous restent historiques, sauf mention explicite.
+
 Expérience exécutée le 10 octobre 2026 sur `task/salh-supervised-training`.
 Code autonome et sorties : [notebook 05](../notebooks/05_random_kfold.ipynb).
 Décisions : [specification](../specs/spec.md). Exports locaux ignorés par Git :
@@ -351,3 +355,37 @@ famille internes, 60 contrôles de découpages, 156 candidats de refit final,
 40 rechargements et hashes des inputs/exports/brut/source du notebook.
 Le brut, la préparation et les expériences précédentes restent préservés.
 Les artefacts dérivés et modèles restent ignorés par Git.
+
+## Extension XGBoost — 12 octobre 2026
+
+Même population, préparation 16/médiane et plis imbriqués ; douze configurations XGBoost choisies en interne.
+
+| CV | Cible | MAE ± SD | RMSE moyen | R² ± SD | MAE OOF | R² OOF |
+| --- | --- | --- | --- | --- | --- | --- |
+| Aléatoire | YS (MPa) | 26,334 ± 2,735 | 39,147 | 0,816 ± 0,043 | 26,327 | 0,815 |
+| Aléatoire | UTS (MPa) | 22,542 ± 2,245 | 34,863 | 0,845 ± 0,044 | 22,543 | 0,846 |
+| Aléatoire | Allongement (points de %) | 2,021 ± 0,146 | 2,858 | 0,654 ± 0,039 | 2,021 | 0,655 |
+| Aléatoire | Charpy* (J) | 14,151 ± 0,724 | 19,707 | 0,845 ± 0,026 | 14,150 | 0,847 |
+
+Sélection actualisée entre **six familles**, uniquement par MAE interne :
+
+| Cible | MAE moyenne | R² moyen |
+| --- | --- | --- |
+| YS (MPa) | 26,334 | 0,816 |
+| UTS (MPa) | 23,604 | 0,830 |
+| Allongement (points de %) | 2,064 | 0,646 |
+| Charpy* (J) | 14,151 | 0,845 |
+
+Refits retenus par CV5 complète (scores de choix, aucun test indépendant) :
+
+| CV de choix | Cible | Famille | MAE de sélection | Paramètres |
+| --- | --- | --- | --- | --- |
+| Aléatoire | YS (MPa) | XGBoost | 26,698 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Aléatoire | UTS (MPa) | XGBoost | 21,609 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Aléatoire | Allongement (points de %) | XGBoost | 1,919 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 150} |
+| Aléatoire | Charpy* (J) | XGBoost | 13,437 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+
+Les index historiques restent à cinq familles ; utiliser désormais
+`models/salh_xgboost_v1/selected_models.json` pour la sélection actualisée.
+Les 44 nouveaux exports de ce protocole (20 XGBoost externes, 20 sélections,
+quatre XGBoost complets) ont tous été rechargés et vérifiés.

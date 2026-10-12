@@ -1,5 +1,9 @@
 # Entraînements supervisés — 10 octobre 2026
 
+> Actualisation du 12 octobre 2026 : XGBoost est ajouté aux benchmarks
+> 16/médiane dans le [rapport 17](17_xgboost_training.md). Les chiffres de
+> l’exécution du 10 octobre ci-dessous restent historiques, sauf mention explicite.
+
 Le notebook [03_modeling](../notebooks/03_modeling.ipynb) contient et exécute
 les pipelines de quatre régressions indépendantes. La branche de travail
 `task/salh-supervised-training` a été créée depuis `task/1-eda-salh` à la demande

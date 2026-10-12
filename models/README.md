@@ -75,3 +75,18 @@ utilisent ensuite les mêmes vrais labels et le pool naturel complet. Les modèl
 externes restent appris sur leur train et leur pool permis uniquement ; les
 refits complets ne peuvent pas être utilisés pour scorer ces plis.
 Résultats et limites : [rapport COREG](../reports/14_coreg_training.md).
+
+## XGBoost et sélection à six familles
+
+`08_xgboost.ipynb` produit `salh_xgboost_v1/` : pour chacun des protocoles
+`random` et `grouped`, 20 pipelines sous `outer_xgboost/`, 20 sous
+`outer_selected/` et quatre sous `full_xgboost/`. Les noms incluent la cible
+et le pli (`fold-1` pour le refit complet). 88 nouveaux exports vérifiés,
+276 au total avec les expériences précédentes.
+
+Utiliser `models/salh_xgboost_v1/selected_models.json` pour les huit choix
+complets (six familles candidates, une par cible/protocole). Certains chemins
+référencent les refits historiques lorsque XGBoost n’est pas retenu. Les index
+05/06 restent historiques à cinq familles. XGBoost et les classes du notebook
+sont embarqués avec cloudpickle ; utiliser les versions du sidecar.
+Résultats et reproduction : [rapport 17](../reports/17_xgboost_training.md).

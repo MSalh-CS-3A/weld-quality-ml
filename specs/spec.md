@@ -35,6 +35,7 @@ un package `src/weld_quality/`.
 | `05_random_kfold.ipynb` | Validation aléatoire 16/médiane, comparaison des regroupements et exports supervisés |
 | `06_grouped_exports.ipynb` | Exports groupés 16/médiane et contrôles de reproduction |
 | `07_coreg.ipynb` | COREG inductif traction, contrôles kNN, validations imbriquées aléatoire/groupée, sensibilité et exports |
+| `08_xgboost.ipynb` | XGBoost, benchmarks 16/médiane à six familles, comparaison COREG, refits complets et audits |
 
 Le téléchargeur standard-library reste autonome dans `scripts/download_data.py`.
 Les dépendances sont dans `requirements.txt`. Aucun notebook ne dépend d’un
@@ -708,3 +709,96 @@ L'équipe comporte trois membres, confirmés par l'utilisateur : Mohamed SALH,
 Mohamed CHEBLI et Idriss BEN LETAIFA. Le numéro d'équipe et le Gantt réel
 (dates, partage des tâches, heures) ne sont pas encore renseignés. La trame
 du rapport ne leur attribue aucun travail ni aucune durée sans information.
+
+## Extension XGBoost autorisée — 12 octobre 2026
+
+L'utilisateur demande l'entraînement et l'intégration aux benchmarks/rapports.
+Le notebook `08_xgboost.ipynb` ajoute une sixième famille supervisée aux
+comparaisons **16/médiane** aléatoire et groupée, quatre cibles et mêmes labels,
+plis externes/internes des notebooks 02/05/06. Les expériences historiques
+13/itérative et les sensibilités 11/13/16 ne sont pas renommées ni recalculées.
+
+Choix figés avant calcul : XGBRegressor, objectif `reg:squarederror`, booster
+`gbtree`, `tree_method=hist`, CPU, graine42, un thread par estimateur ; grille
+profondeur={2,4,6}, learning_rate={0,03;0,1}, n_estimators={150,300}, soit
+12 configurations comme RF/SVR. Fixes : min_child_weight=5, subsample=0,8,
+colsample_bytree=0,8, reg_lambda=1, reg_alpha=0, gamma=0, max_bin=256.
+Les petits arbres et la régularisation limitent la complexité pour ces effectifs ;
+cette grille modeste ne prétend pas couvrir tous les réglages de XGBoost.
+L'objectif quadratique diffère de la MAE utilisée pour sélectionner les paramètres.
+[Référence des paramètres XGBoost](https://xgboost.readthedocs.io/en/stable/parameter.html),
+consultée le 12 octobre 2026.
+
+Le preprocessing commun est réajusté dans chaque train interne/externe ; les
+NaN sont imputés par médiane, sans exploiter la gestion native de XGBoost, pour
+comparer les familles à préparation identique. Aucun early stopping ni eval_set
+externe ; les labels de validation ne participent ni à l'ajustement, ni à l'arrêt.
+Aucune cible et aucune température Charpy inconnue ne sont imputées. Les unités,
+encodages de manquants et définitions des sorties restent ceux du master.
+
+La sélection est recalculée entre six familles par leur MAE interne, avec ordre
+historique puis XGBoost pour les égalités. Nouvelle CV5 de choix complet : KFold
+seed1042 sur les labels triés ou GroupKFold5 sans shuffle. Les résultats des cinq
+familles sont réutilisés après vérification des hashes, paramètres/choix internes,
+IDs et prédictions ; les exports sélectionnés historiques sont préservés.
+Un nouvel index sous `models/salh_xgboost_v1/` référence les six familles.
+La comparaison COREG garde ses entraînements/contrôles inchangés et actualise
+seulement la référence supervisée. MAE/RMSE/R² par pli et OOF sont enregistrés.
+Cette extension postérieure aux diagnostics demeure une comparaison rétrospective,
+sans nouvelle validation indépendante ni recommandation métallurgique causale.
+
+### Résultats XGBoost exécutés — 12 octobre 2026
+
+| CV | Cible | MAE ± SD | RMSE moyen | R² ± SD | MAE OOF | R² OOF |
+| --- | --- | --- | --- | --- | --- | --- |
+| Aléatoire | YS (MPa) | 26,334 ± 2,735 | 39,147 | 0,816 ± 0,043 | 26,327 | 0,815 |
+| Aléatoire | UTS (MPa) | 22,542 ± 2,245 | 34,863 | 0,845 ± 0,044 | 22,543 | 0,846 |
+| Aléatoire | Allongement (points de %) | 2,021 ± 0,146 | 2,858 | 0,654 ± 0,039 | 2,021 | 0,655 |
+| Aléatoire | Charpy* (J) | 14,151 ± 0,724 | 19,707 | 0,845 ± 0,026 | 14,150 | 0,847 |
+| Groupée | YS (MPa) | 54,363 ± 9,820 | 70,263 | 0,367 ± 0,167 | 55,147 | 0,383 |
+| Groupée | UTS (MPa) | 50,215 ± 6,720 | 65,165 | 0,392 ± 0,178 | 49,581 | 0,477 |
+| Groupée | Allongement (points de %) | 3,322 ± 0,381 | 4,196 | 0,238 ± 0,148 | 3,297 | 0,263 |
+| Groupée | Charpy* (J) | 35,450 ± 11,126 | 45,293 | 0,069 ± 0,247 | 35,571 | 0,161 |
+
+Sélection à six familles, uniquement sur MAE interne :
+
+| Cible (unité) | MAE aléatoire | R² aléatoire | MAE groupée | R² groupé |
+| --- | --- | --- | --- | --- |
+| YS (MPa) | 26,334 | 0,816 | 54,363 | 0,367 |
+| UTS (MPa) | 23,604 | 0,830 | 55,691 | 0,307 |
+| Allongement (points de %) | 2,064 | 0,646 | 3,278 | 0,260 |
+| Charpy* (J) | 14,151 | 0,845 | 36,267 | 0,058 |
+
+| CV de choix | Cible | Famille | MAE de sélection | Paramètres |
+| --- | --- | --- | --- | --- |
+| Aléatoire | YS (MPa) | XGBoost | 26,698 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Aléatoire | UTS (MPa) | XGBoost | 21,609 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Aléatoire | Allongement (points de %) | XGBoost | 1,919 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 150} |
+| Aléatoire | Charpy* (J) | XGBoost | 13,437 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Groupée | YS (MPa) | XGBoost | 57,742 | {"model__learning_rate": 0.1, "model__max_depth": 2, "model__n_estimators": 150} |
+| Groupée | UTS (MPa) | SVR RBF | 46,555 | {"model__regressor__C": 10, "model__regressor__epsilon": 0.05, "model__regressor__gamma": 0.05} |
+| Groupée | Allongement (points de %) | XGBoost | 3,252 | {"model__learning_rate": 0.1, "model__max_depth": 2, "model__n_estimators": 300} |
+| Groupée | Charpy* (J) | Random Forest | 32,375 | {"model__max_depth": 10, "model__max_features": 0.5, "model__min_samples_leaf": 1} |
+
+XGBoost améliore la MAE moyenne des quatre cibles en aléatoire. En groupé,
+RF reste plus faible pour YS/UTS/Charpy ; XGBoost a une légère amélioration
+d’allongement. Ce constat descriptif ne remplace pas le choix interne et ne
+démontre ni significativité ni causalité. COREG reste moins performant que
+la sélection à six dans les six cas traction/protocole ; ses gains au même k
+et ses entraînements sont inchangés. Charpy demeure exploratoire.
+
+40 évaluations XGBoost terminées ; 480 configurations internes et 96 CV5
+complètes, 1 968 fits XGBoost. 280 évaluations supervisées réunies et métriques
+recalculées ; 88 nouveaux exports rechargés dans un processus neuf,
+11580 prédictions vérifiées (écart maximal 1.14e-13).
+Total des exports locaux : 276. 41 tests rapides passent.
+Python 3.14.8, XGBoost 3.4.1, scikit-learn 1.9.1.
+Durée notebook : 1.40 minutes, sans heures humaines inférées.
+[Rapport détaillé et fichiers](../reports/17_xgboost_training.md).
+
+L'ajout d'une famille ne garantit pas l'amélioration de la procédure de
+sélection : sa MAE externe baisse dans cinq des huit comparaisons. Elle augmente
+pour l'allongement aléatoire (2,054 → 2,064), UTS groupé (54,344 → 55,691)
+et Charpy groupé (35,752 → 36,267). Ces choix proviennent des scores internes,
+sans correction après lecture des validations externes.
+

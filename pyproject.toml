@@ -17,6 +17,7 @@ dependencies = [
     "scikit-learn>=1.2",
     "scipy",
     "seaborn>=0.13.2",
+    "xgboost>=3.4.1",
 ]
 
 [tool.uv]

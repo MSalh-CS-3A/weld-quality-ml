@@ -1,5 +1,9 @@
 # COREG entraîné : validation aléatoire et par groupes
 
+> Actualisation du 12 octobre 2026 : XGBoost est ajouté aux benchmarks
+> 16/médiane dans le [rapport 17](17_xgboost_training.md). Les chiffres de
+> l’exécution du 10 octobre ci-dessous restent historiques, sauf mention explicite.
+
 Exécution réelle du 10 octobre 2026, branche `task/salh-supervised-training`.
 Code autonome : [07_coreg.ipynb](../notebooks/07_coreg.ipynb).
 Le protocole a été consigné dans [specs/spec.md](../specs/spec.md) avant le calcul.
@@ -233,3 +237,20 @@ Les CSV de scores, OOF, choix internes, journal des pseudo-labels, voisinages,
 itérations, sensibilités, contrôles de rechargement et manifest sont sous
 `data/processed/experiments/salh_coreg_v1/`. Données et modèles restent ignorés
 par Git ; seuls le code, ses sorties de lecture et les justifications sont suivis.
+
+## Référence supervisée étendue — 12 octobre 2026
+
+Les entraînements COREG et ses contrôles restent identiques. La référence
+supervisée intègre désormais XGBoost, mêmes labels et plis ; cette comparaison
+ne mesure pas à elle seule l’effet des pseudo-labels. Les gains au même k
+ci-dessus restent inchangés. COREG demeure moins performant que la procédure
+supervisée dans les six cas.
+
+| CV | Cible | MAE COREG | R² COREG | MAE XGBoost | R² XGBoost | MAE sélection six | R² sélection six |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| random | YS (MPa) | 37,919 | 0,629 | 26,334 | 0,816 | 26,334 | 0,816 |
+| random | UTS (MPa) | 33,037 | 0,709 | 22,542 | 0,845 | 23,604 | 0,830 |
+| random | Allongement (points de %) | 2,402 | 0,535 | 2,021 | 0,654 | 2,064 | 0,646 |
+| grouped | YS (MPa) | 71,074 | -0,056 | 54,363 | 0,367 | 54,363 | 0,367 |
+| grouped | UTS (MPa) | 63,060 | 0,043 | 50,215 | 0,392 | 55,691 | 0,307 |
+| grouped | Allongement (points de %) | 3,904 | -0,028 | 3,322 | 0,238 | 3,278 | 0,260 |

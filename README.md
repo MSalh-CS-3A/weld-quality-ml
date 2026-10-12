@@ -14,6 +14,7 @@ notebooks/
   05_random_kfold.ipynb        validation aléatoire 16/médiane, comparaison et exports
   06_grouped_exports.ipynb     export groupé 16/médiane et contrôle des prédictions
   07_coreg.ipynb               COREG inductif, contrôles kNN, deux validations et exports
+  08_xgboost.ipynb             XGBoost, benchmarks six familles, refits et audits
 scripts/download_data.py      téléchargement autonome et checksum SHA-256
 requirements.txt              dépendances des notebooks
 data/raw/                     fichiers d’origine préservés, ignorés par Git
@@ -42,7 +43,7 @@ python scripts/download_data.py
 python -m jupyterlab
 ```
 
-Choisir le noyau de `.venv`, puis exécuter **01 → 02 → 03 → 04 → 05 → 06 → 07**, de haut en bas.
+Choisir le noyau de `.venv`, puis exécuter **01 → 02 → 03 → 04 → 05 → 06 → 07 → 08**, de haut en bas.
 Si nécessaire, enregistrer le noyau :
 
 ```bash
@@ -116,11 +117,17 @@ transformées. Les modèles des plis et les refits complets sont exportés dans
 `models/salh_coreg_v1/`, avec contrôles et journaux de pseudo-labels.
 Voir [les résultats COREG](reports/14_coreg_training.md).
 
+Le notebook 08 ajoute XGBoost aux quatre cibles dans les deux validations
+16/médiane : réglage imbriqué, benchmarks à six familles, comparaison COREG
+et nouvel index `models/salh_xgboost_v1/selected_models.json`. Les résultats
+historiques sont préservés ; 88 nouveaux exports sont rechargés et vérifiés.
+La suite comprend 41 tests. Voir [les résultats XGBoost](reports/17_xgboost_training.md).
+
 Deux documents en français regroupent les travaux pour lecture :
 [la synthèse globale des résultats](reports/15_synthese_globale_resultats_fr.md)
 et [le rapport du projet, version 1](reports/16_rapport_projet_v1_fr.md).
 Ce dernier est aussi disponible en
-[PDF de cinq pages](output/pdf/rapport_projet_v1_fr.pdf).
+[PDF de cinq pages du 10 octobre, antérieur à XGBoost](output/pdf/rapport_projet_v1_fr.pdf).
 Le [rapport complet en LaTeX](rapport_latex/README.md) détaille toutes les
 étapes, de l'EDA à l'analyse des résultats d'entraînement.
 Les trois auteurs sont renseignés ; le numéro d'équipe, les dates, les

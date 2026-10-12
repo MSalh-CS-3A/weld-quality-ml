@@ -1,5 +1,9 @@
 # Exports des deux protocoles et cadrage semi-supervisé
 
+> Actualisation du 12 octobre 2026 : XGBoost est ajouté aux benchmarks
+> 16/médiane dans le [rapport 17](17_xgboost_training.md). Les chiffres de
+> l’exécution du 10 octobre ci-dessous restent historiques, sauf mention explicite.
+
 Complément exécuté le 10 octobre 2026 sur `task/salh-supervised-training`.
 Le cadrage ci-dessous décrit cette étape ; COREG est désormais implémenté et
 évalué séparément dans [le rapport 14](14_coreg_training.md).
@@ -101,3 +105,37 @@ un pool naturel et reste à définir séparément. Les protocoles Charpy demeure
 partiellement vérifiés. Aucun COREG n'a été entraîné dans ce complément.
 
 Source algorithmique : [Zhou et Li, IJCAI 2005](https://www.ijcai.org/Proceedings/05/Papers/0689.pdf).
+
+## Extension XGBoost — 12 octobre 2026
+
+Même population, préparation 16/médiane et plis imbriqués ; douze configurations XGBoost choisies en interne.
+
+| CV | Cible | MAE ± SD | RMSE moyen | R² ± SD | MAE OOF | R² OOF |
+| --- | --- | --- | --- | --- | --- | --- |
+| Groupée | YS (MPa) | 54,363 ± 9,820 | 70,263 | 0,367 ± 0,167 | 55,147 | 0,383 |
+| Groupée | UTS (MPa) | 50,215 ± 6,720 | 65,165 | 0,392 ± 0,178 | 49,581 | 0,477 |
+| Groupée | Allongement (points de %) | 3,322 ± 0,381 | 4,196 | 0,238 ± 0,148 | 3,297 | 0,263 |
+| Groupée | Charpy* (J) | 35,450 ± 11,126 | 45,293 | 0,069 ± 0,247 | 35,571 | 0,161 |
+
+Sélection actualisée entre **six familles**, uniquement par MAE interne :
+
+| Cible | MAE moyenne | R² moyen |
+| --- | --- | --- |
+| YS (MPa) | 54,363 | 0,367 |
+| UTS (MPa) | 55,691 | 0,307 |
+| Allongement (points de %) | 3,278 | 0,260 |
+| Charpy* (J) | 36,267 | 0,058 |
+
+Refits retenus par CV5 complète (scores de choix, aucun test indépendant) :
+
+| CV de choix | Cible | Famille | MAE de sélection | Paramètres |
+| --- | --- | --- | --- | --- |
+| Groupée | YS (MPa) | XGBoost | 57,742 | {"model__learning_rate": 0.1, "model__max_depth": 2, "model__n_estimators": 150} |
+| Groupée | UTS (MPa) | SVR RBF | 46,555 | {"model__regressor__C": 10, "model__regressor__epsilon": 0.05, "model__regressor__gamma": 0.05} |
+| Groupée | Allongement (points de %) | XGBoost | 3,252 | {"model__learning_rate": 0.1, "model__max_depth": 2, "model__n_estimators": 300} |
+| Groupée | Charpy* (J) | Random Forest | 32,375 | {"model__max_depth": 10, "model__max_features": 0.5, "model__min_samples_leaf": 1} |
+
+Les index historiques restent à cinq familles ; utiliser désormais
+`models/salh_xgboost_v1/selected_models.json` pour la sélection actualisée.
+Les 44 nouveaux exports de ce protocole (20 XGBoost externes, 20 sélections,
+quatre XGBoost complets) ont tous été rechargés et vérifiés.

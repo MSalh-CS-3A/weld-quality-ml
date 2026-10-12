@@ -1,5 +1,9 @@
 # Diagnostic approfondi des faibles performances
 
+> Actualisation du 12 octobre 2026 : XGBoost est ajouté aux benchmarks
+> 16/médiane dans le [rapport 17](17_xgboost_training.md). Les chiffres de
+> l’exécution du 10 octobre ci-dessous restent historiques, sauf mention explicite.
+
 Investigation du 10 octobre 2026, branche `task/salh-supervised-training`.
 Code autonome et sorties dans [notebook 04](../notebooks/04_diagnostics.ipynb).
 Le [benchmark 03](10_supervised_training.md) est conservé.

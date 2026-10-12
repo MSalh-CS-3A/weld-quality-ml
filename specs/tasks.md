@@ -257,3 +257,14 @@ Start an outline earlier; finalize results after T12.
 
 - [Issue and PR templates](https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/about-issue-and-pull-request-templates)
 - [Linking PRs and issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue)
+
+### Extension technique — 12 octobre 2026
+
+Le notebook 08 ajoute XGBoost aux quatre cibles/aux deux protocoles
+16/médiane, douze configurations choisies en interne, benchmarks et refits
+six familles. 40 évaluations XGBoost, 1 968 fits, 88 nouveaux exports
+rechargés, 276 au total ; 41 tests passent. Rapports 10 à 16 annotés ou
+actualisés et rapport 17 ajouté. Les historiques 13/itérative et COREG
+sont préservés. Revue croisée et validation scientifique indépendante
+restent ouvertes ; aucun temps humain n’est inféré.
+

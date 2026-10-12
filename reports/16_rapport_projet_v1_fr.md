@@ -1,6 +1,6 @@
 # Prédiction des propriétés mécaniques de soudures d’acier
 
-**Rapport du projet - première version pour relecture - 10 octobre 2026**
+**Rapport du projet - version actualisée pour relecture - 12 octobre 2026**
 
 **Auteurs : Mohamed SALH, Mohamed CHEBLI et Idriss BEN LETAIFA.**
 
@@ -11,11 +11,11 @@ idriss.benletaifa@student-cs.fr. **Numéro d’équipe :** à renseigner.
 
 Nous étudions la Cambridge Weld DB pour prédire trois propriétés de traction
 et, de façon exploratoire, l’énergie Charpy à température connue. La préparation
-conserve 1 555 observations ; cinq familles supervisées et COREG sont évaluées
+conserve 1 555 observations ; six familles supervisées et COREG sont évaluées
 avec des validations imbriquées aléatoire et par séries. La configuration retenue
 utilise 16 entrées numériques, le procédé et une imputation médiane locale au
-train. Les R² aléatoires vont de 0,660 à 0,836 pour la procédure supervisée ;
-les R² groupés de 0,075 à 0,337. COREG ne l’améliore pas. Le transfert entre
+train. Les R² aléatoires vont de 0,646 à 0,845 pour la procédure supervisée ;
+les R² groupés de 0,058 à 0,367. COREG ne l’améliore pas. Le transfert entre
 séries et l’hétérogénéité des essais limitent les conclusions opérationnelles.
 
 **Plan :** 1. Problématique ; 2. Données et cibles ; 3. Préparation et ACP ;
@@ -103,8 +103,9 @@ transformations apprises globalement n’est réutilisée dans la CV prédictive
 | SVR RBF | Non-linéarité ; C=1/10/100, gamma=scale/0,05, epsilon=0,05/0,2 |
 | RF | 300 arbres ; feuille=1/2/5, profondeur libre/10, max_features=0,5/1 |
 | kNN | Régression locale ; k=3/5/9/15, distances L1/L2, poids uniformes |
+| XGBoost | Arbres boostés ; profondeur 2/4/6, taux 0,03/0,1, 150/300 arbres ; hist CPU |
 
-La SVR standardise aussi y dans son train puis restitue son unité. Les 39
+La SVR standardise aussi y dans son train puis restitue son unité. Les 51
 configurations, baseline incluse, sont choisies par MAE interne. La RF est un
 contrôle non linéaire polyvalent, Ridge un contrôle linéaire et kNN le pendant
 supervisé de COREG. Aucun algorithme n’est supposé optimal avant comparaison.
@@ -141,10 +142,10 @@ Les MAE sont en MPa, points de % ou J selon la cible ; Charpy* est exploratoire.
 
 | Cible (unité) | MAE aléatoire | R² aléatoire | MAE groupée | R² groupé |
 | --- | --- | --- | --- | --- |
-| YS (MPa) | 31,630 | 0,755 | 56,757 | 0,337 |
-| UTS (MPa) | 23,861 | 0,836 | 54,344 | 0,334 |
-| Allongement (points de %) | 2,054 | 0,660 | 3,517 | 0,157 |
-| Charpy* (J) | 16,461 | 0,776 | 35,752 | 0,075 |
+| YS (MPa) | 26,334 | 0,816 | 54,363 | 0,367 |
+| UTS (MPa) | 23,604 | 0,830 | 55,691 | 0,307 |
+| Allongement (points de %) | 2,064 | 0,646 | 3,278 | 0,260 |
+| Charpy* (J) | 14,151 | 0,845 | 36,267 | 0,058 |
 
 **Tableau 4 - R² moyens par famille : A=aléatoire, G=groupé.**
 Le classement externe décrit les performances ; il ne décide pas des exports.
@@ -156,14 +157,16 @@ Le classement externe décrit les performances ; il ne décide pas des exports.
 | SVR RBF | 0,754 / 0,264 | 0,836 / 0,316 | 0,556 / 0,106 | 0,749 / 0,091 |
 | Random Forest | 0,765 / 0,390 | 0,805 / 0,394 | 0,660 / 0,226 | 0,795 / 0,138 |
 | kNN | 0,619 / -0,140 | 0,697 / -0,115 | 0,530 / -0,060 | 0,651 / -0,099 |
+| XGBoost | 0,816 / 0,367 | 0,845 / 0,392 | 0,654 / 0,238 | 0,845 / 0,069 |
 
-![Figure 2 - R² moyens ± SD des cinq plis ; sélection supervisée et COREG aléatoire.](figures/15_comparaison_globale_fr.png)
+![Figure 2 - R² moyens ± SD des cinq plis ; sélection à six familles, XGBoost et COREG, deux protocoles.](figures/15_comparaison_globale_fr.png)
 
-La figure 2 montre la chute lors du transfert entre séries. En aléatoire, les
-familles RF/SVR sont compétitives ; la sélection interne atteint 0,755/0,836/
-0,660 pour la traction. En groupé, ses R² restent 0,337/0,334/0,157. La RF
-isolée peut avoir un meilleur score externe que la sélection interne : cette
-observation ne permet pas de sélectionner sur la validation. Les refits complets
+La figure 2 montre la baisse lors du transfert entre séries. XGBoost améliore
+la MAE moyenne des quatre cibles en aléatoire parmi les familles évaluées ; en groupé, RF et
+XGBoost restent proches pour la traction et Charpy demeure limité. La sélection
+à six familles reste fondée sur les MAE internes, sans consulter les scores
+externes. La sélection actualisée améliore cinq comparaisons sur huit ; elle
+dégrade l’allongement aléatoire, UTS groupé et Charpy groupé. Les refits complets
 sont réglés par une nouvelle CV5, et ne servent jamais à scorer les plis.
 
 <!-- pagebreak -->
@@ -253,7 +256,7 @@ La référence retenue est supervisée, avec 16 variables et médiane locale au
 train ; la famille dépend de la cible et de la CV interne. COREG satisfait
 l’étude semi-supervisée demandée mais n’améliore pas ce benchmark à budget
 complet de labels. La priorité est le transfert entre séries et la qualité
-des mesures. Les 188 pipelines sont exportées ; 37 tests et les audits OOF
+des mesures. Les 276 pipelines sont exportées ; 41 tests et les audits OOF
 valident le calcul. Ces contrôles ne constituent pas une validation industrielle.
 
 ## 11. Organisation et trame Gantt à compléter
@@ -284,7 +287,11 @@ pas des durées de travail humain. La revue croisée par l’équipe reste à do
 
 [4] Cool, T. (1996). [Design of Steel Weld Deposits](https://www.phase-trans.msm.cam.ac.uk/2012/Cool_Thesis.pdf), thèse, Cambridge, section 6.4 ; contexte Charpy et variables supplémentaires.
 
-[5] Projet, notebooks 01 à 07 et rapports 10 à 14 : protocoles, résultats locaux et audits reproductibles, 10 octobre 2026.
+[5] Projet, notebooks 01 à 08 et rapports 10 à 14 et 17 : protocoles, résultats locaux et audits reproductibles, 10 et 12 octobre 2026.
 
 La [synthèse globale](15_synthese_globale_resultats_fr.md) contient les dispersions,
-RMSE, sensibilités, paramètres complets et preuves des rapports 10 à 14.
+RMSE, sensibilités, paramètres complets et preuves des rapports 10 à 14 et 17.
+
+Les résultats détaillés de l’extension XGBoost et ses audits sont dans le
+[rapport 17](17_xgboost_training.md). Le benchmark initial et les sensibilités
+restent historiques ; l’extension ne crée pas de validation indépendante.

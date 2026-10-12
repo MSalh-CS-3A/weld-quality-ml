@@ -2,9 +2,9 @@
 
 **Auteurs : Mohamed SALH, Mohamed CHEBLI et Idriss BEN LETAIFA.**
 
-**Version du 10 octobre 2026 - branche `task/salh-supervised-training`.**
+**Version du 12 octobre 2026 - extension XGBoost - branche `task/salh-supervised-training`.**
 Cette synthèse consolide les expériences réellement exécutées dans les notebooks
-01 à 07. Les chiffres sont lus dans les CSV dont les hashes ont été vérifiés.
+01 à 08. Les chiffres sont lus dans les CSV dont les hashes ont été vérifiés.
 Le [rapport complet, première version](16_rapport_projet_v1_fr.md) fournit une
 présentation courte adaptée au rendu demandé par l’énoncé.
 
@@ -23,10 +23,10 @@ des cibles. YS désigne la limite d’élasticité. Charpy* reste exploratoire.
 
 | Cible (unité) | MAE aléatoire | R² aléatoire | MAE groupée | R² groupé |
 | --- | --- | --- | --- | --- |
-| YS (MPa) | 31,630 | 0,755 | 56,757 | 0,337 |
-| UTS (MPa) | 23,861 | 0,836 | 54,344 | 0,334 |
-| Allongement (points de %) | 2,054 | 0,660 | 3,517 | 0,157 |
-| Charpy* (J) | 16,461 | 0,776 | 35,752 | 0,075 |
+| YS (MPa) | 26,334 | 0,816 | 54,363 | 0,367 |
+| UTS (MPa) | 23,604 | 0,830 | 55,691 | 0,307 |
+| Allongement (points de %) | 2,064 | 0,646 | 3,278 | 0,260 |
+| Charpy* (J) | 14,151 | 0,845 | 36,267 | 0,058 |
 
 ![Figure 1 - Comparaison globale des R² moyens et de leur dispersion.](figures/15_comparaison_globale_fr.png)
 
@@ -125,23 +125,26 @@ YS/UTS/allongement/Charpy partagent une série avec le train. Pour Charpy,
 
 **Tableau 2 - Résultats de la sélection interne avec dispersion entre plis.**
 
-| Cible | MAE aléatoire ± SD | R² aléatoire ± SD | MAE groupée ± SD | R² groupé ± SD |
+| Cible (unité) | MAE aléatoire ± SD | R² aléatoire ± SD | MAE groupée ± SD | R² groupé ± SD |
 | --- | --- | --- | --- | --- |
-| YS | 31,630 ± 4,114 | 0,755 ± 0,063 | 56,757 ± 12,398 | 0,337 ± 0,161 |
-| UTS | 23,861 ± 0,906 | 0,836 ± 0,027 | 54,344 ± 13,181 | 0,334 ± 0,228 |
-| Allongement | 2,054 ± 0,239 | 0,660 ± 0,058 | 3,517 ± 0,516 | 0,157 ± 0,220 |
-| Charpy* | 16,461 ± 1,161 | 0,776 ± 0,062 | 35,752 ± 11,863 | 0,075 ± 0,138 |
+| YS (MPa) | 26,334 ± 2,735 | 0,816 ± 0,043 | 54,363 ± 9,820 | 0,367 ± 0,167 |
+| UTS (MPa) | 23,604 ± 0,765 | 0,830 ± 0,035 | 55,691 ± 12,936 | 0,307 ± 0,215 |
+| Allongement (points de %) | 2,064 ± 0,225 | 0,646 ± 0,053 | 3,278 ± 0,374 | 0,260 ± 0,138 |
+| Charpy* (J) | 14,151 ± 0,724 | 0,845 ± 0,026 | 36,267 ± 12,771 | 0,058 ± 0,119 |
 
 ## 5. Comparaison de toutes les familles supervisées
 
 Toutes les familles utilisent les mêmes pipelines 16/médiane, sauf la baseline
 qui prédit seulement la médiane de y. Ridge est le contrôle linéaire régularisé ;
-SVR RBF et RF capturent des relations non linéaires ; kNN est le contrôle local.
+SVR RBF, RF et XGBoost capturent des relations non linéaires ; kNN est le contrôle local.
 
 Grilles internes : Ridge alpha=0,01/0,1/1/10/100/1 000 ; SVR C=1/10/100,
 gamma=scale/0,05, epsilon=0,05/0,2 ; RF 300 arbres, feuille=1/2/5,
 profondeur libre/10, max_features=0,5/1, seed42 ; kNN k=3/5/9/15, L1/L2,
-poids uniformes. 39 configurations au total par cible/pli, baseline incluse.
+poids uniformes. 51 configurations au total par cible/pli, baseline incluse. XGBoost ajoute
+12 configurations : profondeur 2/4/6, taux 0,03/0,1, 150/300 arbres ; CPU hist,
+seed42, min_child_weight=5, subsample=colsample_bytree=0,8, reg_lambda=1.
+Objectif quadratique, choix par MAE interne, aucun early stopping externe.
 
 **Tableau 3 - Validation aléatoire : familles évaluées séparément.**
 
@@ -152,21 +155,25 @@ poids uniformes. 39 configurations au total par cible/pli, baseline incluse.
 | YS (MPa) | SVR RBF | 31,747 ± 3,900 | 45,403 | 0,754 ± 0,046 |
 | YS (MPa) | Random Forest | 31,242 ± 4,038 | 44,172 | 0,765 ± 0,064 |
 | YS (MPa) | kNN | 38,144 ± 2,497 | 56,273 | 0,619 ± 0,059 |
+| YS (MPa) | XGBoost | 26,334 ± 2,735 | 39,147 | 0,816 ± 0,043 |
 | UTS (MPa) | Médiane de y | 68,879 ± 4,438 | 91,419 | -0,050 ± 0,019 |
 | UTS (MPa) | Ridge | 44,319 ± 3,535 | 60,137 | 0,538 ± 0,118 |
 | UTS (MPa) | SVR RBF | 23,861 ± 0,906 | 35,989 | 0,836 ± 0,027 |
 | UTS (MPa) | Random Forest | 26,906 ± 1,907 | 39,165 | 0,805 ± 0,045 |
 | UTS (MPa) | kNN | 33,452 ± 4,870 | 48,626 | 0,697 ± 0,098 |
+| UTS (MPa) | XGBoost | 22,542 ± 2,245 | 34,863 | 0,845 ± 0,044 |
 | Allongement (points de %) | Médiane de y | 4,019 ± 0,149 | 4,903 | -0,015 ± 0,019 |
 | Allongement (points de %) | Ridge | 3,011 ± 0,152 | 3,923 | 0,345 ± 0,119 |
 | Allongement (points de %) | SVR RBF | 2,268 ± 0,198 | 3,227 | 0,556 ± 0,094 |
 | Allongement (points de %) | Random Forest | 2,054 ± 0,239 | 2,835 | 0,660 ± 0,058 |
 | Allongement (points de %) | kNN | 2,423 ± 0,260 | 3,305 | 0,530 ± 0,117 |
+| Allongement (points de %) | XGBoost | 2,021 ± 0,146 | 2,858 | 0,654 ± 0,039 |
 | Charpy* (J) | Médiane de y | 36,756 ± 2,813 | 51,989 | -0,069 ± 0,037 |
 | Charpy* (J) | Ridge | 26,913 ± 0,587 | 34,170 | 0,529 ± 0,113 |
 | Charpy* (J) | SVR RBF | 17,393 ± 0,988 | 25,068 | 0,749 ± 0,043 |
 | Charpy* (J) | Random Forest | 16,099 ± 1,027 | 22,636 | 0,795 ± 0,035 |
 | Charpy* (J) | kNN | 19,253 ± 1,518 | 29,586 | 0,651 ± 0,055 |
+| Charpy* (J) | XGBoost | 14,151 ± 0,724 | 19,707 | 0,845 ± 0,026 |
 
 **Tableau 4 - Validation groupée : familles évaluées séparément.**
 
@@ -177,26 +184,37 @@ poids uniformes. 39 configurations au total par cible/pli, baseline incluse.
 | YS (MPa) | SVR RBF | 59,350 ± 9,755 | 76,275 | 0,264 ± 0,144 |
 | YS (MPa) | Random Forest | 54,139 ± 10,658 | 69,570 | 0,390 ± 0,132 |
 | YS (MPa) | kNN | 73,496 ± 9,189 | 94,956 | -0,140 ± 0,151 |
+| YS (MPa) | XGBoost | 54,363 ± 9,820 | 70,263 | 0,367 ± 0,167 |
 | UTS (MPa) | Médiane de y | 72,664 ± 15,237 | 93,729 | -0,180 ± 0,114 |
 | UTS (MPa) | Ridge | 61,898 ± 13,272 | 77,232 | 0,179 ± 0,152 |
 | UTS (MPa) | SVR RBF | 52,861 ± 11,679 | 70,542 | 0,316 ± 0,145 |
 | UTS (MPa) | Random Forest | 48,905 ± 7,269 | 65,236 | 0,394 ± 0,160 |
 | UTS (MPa) | kNN | 68,538 ± 14,821 | 90,258 | -0,115 ± 0,121 |
+| UTS (MPa) | XGBoost | 50,215 ± 6,720 | 65,165 | 0,392 ± 0,178 |
 | Allongement (points de %) | Médiane de y | 4,086 ± 0,309 | 4,962 | -0,062 ± 0,047 |
 | Allongement (points de %) | Ridge | 3,658 ± 0,362 | 4,735 | 0,016 ± 0,229 |
 | Allongement (points de %) | SVR RBF | 3,670 ± 0,345 | 4,534 | 0,106 ± 0,167 |
 | Allongement (points de %) | Random Forest | 3,339 ± 0,342 | 4,218 | 0,226 ± 0,146 |
 | Allongement (points de %) | kNN | 3,983 ± 0,328 | 4,908 | -0,060 ± 0,223 |
+| Allongement (points de %) | XGBoost | 3,322 ± 0,381 | 4,196 | 0,238 ± 0,148 |
 | Charpy* (J) | Médiane de y | 36,035 ± 16,909 | 50,603 | -0,149 ± 0,251 |
 | Charpy* (J) | Ridge | 34,752 ± 10,268 | 45,433 | 0,069 ± 0,213 |
 | Charpy* (J) | SVR RBF | 35,963 ± 8,404 | 44,879 | 0,091 ± 0,206 |
 | Charpy* (J) | Random Forest | 33,033 ± 10,974 | 43,560 | 0,138 ± 0,209 |
 | Charpy* (J) | kNN | 35,725 ± 12,222 | 48,624 | -0,099 ± 0,354 |
+| Charpy* (J) | XGBoost | 35,450 ± 11,126 | 45,293 | 0,069 ± 0,247 |
 
-La RF fournit une référence polyvalente. La SVR est particulièrement utile
-pour UTS en aléatoire. Cela ne signifie pas qu’une famille domine toutes les
-cibles et tous les contextes ; les choix complets viennent d’une nouvelle CV5,
-jamais du classement externe ci-dessus.
+XGBoost a la plus faible MAE moyenne des familles en aléatoire pour les quatre
+cibles. En groupé, RF reste plus faible pour YS/UTS/Charpy ; XGBoost a une
+légère amélioration pour l’allongement. Les choix complets viennent d’une
+nouvelle CV5, jamais du classement externe ci-dessus.
+
+L'ajout d'une famille ne garantit pas l'amélioration de la procédure de
+sélection : sa MAE externe baisse dans cinq des huit comparaisons. Elle augmente
+pour l'allongement aléatoire (2,054 → 2,064), UTS groupé (54,344 → 55,691)
+et Charpy groupé (35,752 → 36,267). Ces choix proviennent des scores internes,
+sans correction après lecture des validations externes.
+
 
 ## 6. Ce que les diagnostics ont changé
 
@@ -327,30 +345,32 @@ scores externes de la procédure imbriquée.
 
 | CV de choix | Cible | Famille | MAE de sélection | Paramètres |
 | --- | --- | --- | --- | --- |
-| Aléatoire | YS | SVR RBF | 31,228 | {"model__regressor__C": 10, "model__regressor__epsilon": 0.05, "model__regressor__gamma": "scale"} |
-| Aléatoire | UTS | SVR RBF | 24,060 | {"model__regressor__C": 10, "model__regressor__epsilon": 0.05, "model__regressor__gamma": 0.05} |
-| Aléatoire | Allongement | Random Forest | 1,940 | {"model__max_depth": null, "model__max_features": 0.5, "model__min_samples_leaf": 1} |
-| Aléatoire | Charpy* | Random Forest | 15,387 | {"model__max_depth": null, "model__max_features": 1.0, "model__min_samples_leaf": 1} |
-| Groupée | YS | Random Forest | 58,695 | {"model__max_depth": null, "model__max_features": 0.5, "model__min_samples_leaf": 2} |
-| Groupée | UTS | SVR RBF | 46,555 | {"model__regressor__C": 10, "model__regressor__epsilon": 0.05, "model__regressor__gamma": 0.05} |
-| Groupée | Allongement | Random Forest | 3,282 | {"model__max_depth": null, "model__max_features": 0.5, "model__min_samples_leaf": 1} |
-| Groupée | Charpy* | Random Forest | 32,375 | {"model__max_depth": 10, "model__max_features": 0.5, "model__min_samples_leaf": 1} |
+| Aléatoire | YS (MPa) | XGBoost | 26,698 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Aléatoire | UTS (MPa) | XGBoost | 21,609 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Aléatoire | Allongement (points de %) | XGBoost | 1,919 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 150} |
+| Aléatoire | Charpy* (J) | XGBoost | 13,437 | {"model__learning_rate": 0.1, "model__max_depth": 6, "model__n_estimators": 300} |
+| Groupée | YS (MPa) | XGBoost | 57,742 | {"model__learning_rate": 0.1, "model__max_depth": 2, "model__n_estimators": 150} |
+| Groupée | UTS (MPa) | SVR RBF | 46,555 | {"model__regressor__C": 10, "model__regressor__epsilon": 0.05, "model__regressor__gamma": 0.05} |
+| Groupée | Allongement (points de %) | XGBoost | 3,252 | {"model__learning_rate": 0.1, "model__max_depth": 2, "model__n_estimators": 300} |
+| Groupée | Charpy* (J) | Random Forest | 32,375 | {"model__max_depth": 10, "model__max_features": 0.5, "model__min_samples_leaf": 1} |
 
 80 pipelines supervisées sont exportées : 40 aléatoires et 40 groupées.
 COREG ajoute 108 pipelines : 90 externes et 18 complètes, contrôles inclus.
-Total **188 pipelines** sous `models/`. Les 80 supervisées se répartissent
+XGBoost ajoute 88 exports (40 externes, 40 sélections actualisées, huit complets).
+Total **276 pipelines** sous `models/`. Les 80 supervisées se répartissent
 en 40 modèles de plis et 40 refits ; COREG en 30+6 modèles et 60+12 contrôles.
 Les refits complets ont vu tous les labels et ne servent jamais à scorer
 les plis. Le preprocessing et les métadonnées accompagnent chaque export.
 
-37 tests ciblés passent. Pour COREG, l’audit recalcule 180 scores, vérifie
+41 tests ciblés passent ; les 88 nouveaux exports sont rechargés dans un
+processus neuf et les 80 modèles externes reproduisent leurs OOF. Pour COREG, l’audit recalcule 180 scores, vérifie
 576 fits et 81 931 pseudo-labels sur tous les contextes, et recalcule
 1 410 gains sur douze modèles. Ce cumul n’est pas un nombre d’observations
 distinctes ; les mêmes U peuvent revenir dans des contextes de CV différents.
 Tous les exports COREG sont rechargés et les 90 modèles externes reproduisent
-leurs OOF. Les autres audits figurent dans les rapports 10 à 14.
+leurs OOF. Les autres audits figurent dans les rapports 10 à 14 et 17.
 
-Reproduction : notebooks 01 à 07, dépendances et noyau du projet, fichiers
+Reproduction : notebooks 01 à 08, dépendances et noyau du projet, fichiers
 bruts inchangés, CSV non imputés du master, manifests/hashes, seed42 et dérivées,
 grilles et choix internes enregistrés. L’exécution COREG a été reprise après
 interruption sans modifier les résultats principaux. Données générées,
@@ -387,10 +407,14 @@ par l’équipe, sans confondre durée de calcul et travail humain.
 
 [4] Cool, T. (1996). [Design of Steel Weld Deposits](https://www.phase-trans.msm.cam.ac.uk/2012/Cool_Thesis.pdf), thèse, Cambridge, section 6.4 ; contexte Charpy et variables supplémentaires.
 
-[5] Projet, notebooks 01 à 07 et rapports 10 à 14 : protocoles, résultats locaux et audits reproductibles, 10 octobre 2026.
+[5] Projet, notebooks 01 à 08 et rapports 10 à 14 et 17 : protocoles, résultats locaux et audits reproductibles, 10 et 12 octobre 2026.
 
 Les rapports détaillés [supervisé initial](10_supervised_training.md),
 [diagnostics](11_performance_diagnostics.md), [aléatoire](12_random_kfold_training.md),
 [exports groupés](13_grouped_exports_and_ssl_plan.md) et [COREG](14_coreg_training.md)
 documentent les réserves, contrôles et tableaux complets. Les décisions actives
 sont dans [specs/spec.md](../specs/spec.md).
+
+Les résultats détaillés de l’extension XGBoost et ses audits sont dans le
+[rapport 17](17_xgboost_training.md). Le benchmark initial et les sensibilités
+restent historiques ; l’extension ne crée pas de validation indépendante.

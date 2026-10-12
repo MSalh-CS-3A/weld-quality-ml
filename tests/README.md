@@ -68,3 +68,10 @@ Le notebook 07 implémente COREG et ses contrôles. La suite comprend désormais
 ne reproduit pas les entraînements réels. Le benchmark complet, ses audits
 d'accès aux données et les rechargements de modèles sont décrits dans
 `reports/14_coreg_training.md`.
+
+Le notebook 08 ajoute quatre tests XGBoost, soit **41 tests rapides** au total :
+preprocessing appris seulement dans chaque train interne, choix de famille
+sur MAE interne malgré un classement externe différent, sérialisation et
+température Charpy obligatoire, moyenne de plis distincte des métriques OOF.
+Le benchmark réel et les 88 rechargements indépendants sont décrits dans
+[le rapport 17](../reports/17_xgboost_training.md).
