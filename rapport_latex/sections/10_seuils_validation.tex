@@ -1,0 +1,221 @@
+% =====================================================================
+%  10. Seuils normatifs et validation des soudures
+% =====================================================================
+\clearpage
+\section{Seuils normatifs et validation des soudures}
+\label{sec:validation}
+
+Les sections précédentes prédisent quatre propriétés. Pour juger la
+\og qualité \fg{} d'une soudure, il faut encore décider si ces propriétés sont
+\emph{suffisantes}. Cette section définit des seuils par cible à partir de
+normes publiées, puis une règle de décision qui tient compte de l'erreur des
+modèles. Le profil et le niveau de prudence ont été choisis par l'équipe ;
+la recherche complète et ses sources sont dans
+\fichier{reports/18\_seuils\_validation\_fr.md}, le code dans
+\notebook{09\_validation.ipynb}.
+
+\subsection{Référence normative}
+
+La base décrit surtout du \textbf{métal fondu} : 1\,121 des 1\,555 lignes de la
+cohorte proviennent du soudage manuel à l'électrode enrobée (MMA). Les normes de
+\emph{classification des produits consommables} testent précisément ce métal
+fondu pur ; ce sont donc les références directes. Les normes de qualification de
+modes opératoires (ISO~15614-1, DNV-OS-C401) testent un joint et renvoient au
+métal de base : elles fixent le niveau d'exigence d'une application, pas une
+valeur unique.
+
+\paragraph{ISO 2560-A~\cite{iso_2560,twi_consumables}.} Pour les aciers non
+alliés et à grains fins, une classe impose simultanément une limite d'élasticité
+minimale, une plage de résistance et un allongement minimal
+(\cref{tab:iso2560}). La résilience est notée par la température à laquelle la
+\textbf{moyenne de trois éprouvettes Charpy atteint 47\,J} (symbole A : $+20$\,°C,
+0 : 0\,°C, 2 : $-20$\,°C, 3 : $-30$\,°C, 4 : $-40$\,°C, 5 : $-50$\,°C,
+6 : $-60$\,°C) ; une seule valeur individuelle peut être inférieure à 47\,J, sans
+descendre sous 32\,J. La limite d'élasticité est $R_{eL}$ (ou $R_{p0,2}$ sans
+palier) et l'allongement est mesuré sur une longueur de cinq diamètres.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{ISO 2560-A, tableau 1A : propriétés de traction du métal fondu par
+classe, et ISO 18275-A pour les aciers à haute résistance.}
+\label{tab:iso2560}
+\begin{tabular}{@{}l c r c r@{}}
+\toprule
+Norme & Symbole & \YS{} min (MPa) & \UTS{} (MPa) & Allongement min (\%) \\
+\midrule
+ISO 2560-A & 35 & 355 & 440--570 & 22 \\
+           & 38 & 380 & 470--600 & 20 \\
+           & \textbf{42} & \textbf{420} & \textbf{500--640} & \textbf{20} \\
+           & 46 & 460 & 530--680 & 20 \\
+           & 50 & 500 & 560--720 & 18 \\
+\midrule
+ISO 18275-A & 55 & 550 & 610--780 & 18 \\
+            & 62 & 620 & 690--890 & 18 \\
+            & 69 & 690 & 760--960 & 17 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Autres références.} ISO 18275-A~\cite{iso_18275} prolonge le même
+système (47\,J) au-delà de 500\,MPa. L'AWS A5.1 utilise un système à 27\,J :
+une électrode E7018 doit atteindre \YS{} $\geq$ 400\,MPa, \UTS{} $\geq$ 490\,MPa,
+22\,\% d'allongement et 27\,J à $-29$\,°C~\cite{aws_a51}. En offshore, la
+DNV exige pour le métal fondu la même énergie que pour le métal de base en sens
+travers, à la température de la nuance, avec une valeur individuelle au moins
+égale à 70\,\% de la moyenne requise~\cite{dnv_os_c401} ; pour le métal de
+base, l'énergie en sens long vaut environ \YS/10 en joules (42\,J pour 420\,MPa,
+69\,J pour 690\,MPa)~\cite{dnv_os_b101}.
+
+\paragraph{Compromis.} Les seuils ne sont pas indépendants.
+\begin{itemize}
+  \item \textbf{Résistance contre allongement} : les normes abaissent l'allongement minimal quand la classe monte (22 à 15\,\%) ; dans nos données, la corrélation de Spearman entre \YS{} et allongement vaut $-0{,}73$ (622 soudures, 33 séries).
+  \item \textbf{Résistance contre ténacité} : un métal fondu se rend facilement résistant, plus difficilement tenace ; la composition (Mn faible, Ni élevé) peut déplacer ce compromis sans le supprimer~\cite{keehan_2001}. Sur des monopieux d'éoliennes en S355, l'énergie Charpy du métal fondu est environ 30\,\% plus faible que celle du métal de base~\cite{mehmanparast_2018}.
+  \item \textbf{Sur-résistance contre borne haute} : la plage d'\UTS{} limite la sur-résistance ; 27\,\% des \UTS{} de la cohorte dépassent 640\,MPa.
+\end{itemize}
+
+\subsection{Profil retenu et règle de décision}
+
+\begin{decision}
+Le profil retenu est \textbf{ISO 2560-A E~42~2} : \YS{} $\geq$ 420\,MPa,
+\UTS{} $\geq$ 500\,MPa, allongement $\geq$ 20\,\% et énergie Charpy moyenne
+$\geq$ 47\,J à $-20$\,°C, tous \textbf{critiques} ; \UTS{} $\leq$ 640\,MPa est
+\textbf{informatif}. La classe 42 est au centre des données (médianes : \YS{}
+496\,MPa, \UTS{} 576\,MPa, allongement 26,6\,\%) et $-20$\,°C est l'une des
+températures d'essai les plus fréquentes (76 couples). D'autres profils sont
+documentés (AWS E7018, E~42~4 à $-40$\,°C pour l'offshore et l'éolien,
+ISO 18275 E~55~4) mais non retenus.
+\end{decision}
+
+Une prédiction a une erreur. Pour en tenir compte, nous appliquons la règle de
+la \emph{bande de garde} du JCGM~106 (§8.3)~\cite{jcgm_106}. Pour un critère de
+seuil bas $L$ (resp. haut $H$), une valeur $\hat{y}$ d'incertitude type $u$
+reçoit le statut :
+\begin{equation}
+  \text{C (conforme) si } \hat{y} - w \geq L, \qquad
+  \text{NC (non conforme) si } \hat{y} + w < L, \qquad
+  \text{I (indéterminé) sinon},
+\end{equation}
+avec $w = k\,u$ et symétriquement pour $H$. Avec $k = 2$ ($w = U = 2u$, règle
+par défaut de l'ISO~14253-1), la probabilité d'accepter une soudure non conforme
+est au plus de 2,3\,\% pour une erreur normale. La décision globale est alors :
+\begin{itemize}
+  \item \textbf{VALIDÉ} si tous les critères sont C ;
+  \item \textbf{NON VALIDÉ} si au moins un critère critique est NC ;
+  \item \textbf{PARTIEL} sinon : la soudure doit être confirmée par un essai réel.
+\end{itemize}
+
+\subsection{Mise en œuvre}
+
+Le notebook 09 applique cette règle à deux sources sur les 1\,555 soudures de la
+cohorte :
+\begin{itemize}
+  \item les \textbf{mesures} de la base, avec $w = 0$ (aucune incertitude de mesure n'est publiée) ; une cible absente donne I, et le Charpy n'est tranché que si l'unique couple $E(T)$ suffit, l'énergie étant supposée croissante avec la température ;
+  \item les \textbf{prédictions hors pli} de la sélection à six familles, pour chaque protocole : chaque soudure est prédite par le modèle externe qui ne l'a pas vue (ni sa série en groupé), et l'énergie Charpy est prédite à $-20$\,°C.
+\end{itemize}
+L'incertitude $u$ est la RMSE hors pli réunie de chaque protocole et cible. Le
+\cref{tab:limites} donne les limites d'acceptation qui en résultent. Les
+40 modèles sont vérifiés par empreinte, reproduisent exactement leurs
+prédictions exportées, et six tests couvrent la règle.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Bande de garde $w = 2u$ et limites appliquées à la valeur prédite
+(C si / NC si), profil E~42~2.}
+\label{tab:limites}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}l r l r l@{}}
+\toprule
+ & \multicolumn{2}{c}{Validation aléatoire} & \multicolumn{2}{c}{Validation groupée} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Critère & $w$ & C si / NC si & $w$ & C si / NC si \\
+\midrule
+\YS{} $\geq$ 420\,MPa          & 79,1 & $\geq 499{,}1$ / $< 340{,}9$ & 144,5 & $\geq 564{,}5$ / $< 275{,}5$ \\
+\UTS{} $\geq$ 500\,MPa         & 73,2 & $\geq 573{,}2$ / $< 426{,}8$ & 141,4 & $\geq 641{,}5$ / $< 358{,}6$ \\
+\UTS{} $\leq$ 640\,MPa         & 73,2 & $\leq 566{,}8$ / $> 713{,}2$ & 141,4 & $\leq 498{,}6$ / $> 781{,}5$ \\
+Allongement $\geq$ 20\,\%      & 5,8  & $\geq 25{,}8$ / $< 14{,}2$   & 8,3   & $\geq 28{,}3$ / $< 11{,}7$ \\
+KV($-20$\,°C) $\geq$ 47\,J     & 39,5 & $\geq 86{,}5$ / $< 7{,}5$    & 96,0  & $\geq 143{,}0$ / jamais NC \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La plage d'\UTS{} (140\,MPa) est plus étroite que deux bandes de garde dans les
+deux protocoles : aucune prédiction ne peut rendre conformes à la fois
+\UTS{} $\geq$ 500 et \UTS{} $\leq$ 640\,MPa.
+
+\subsection{Résultats}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{val_decisions}
+\caption{Décision de validation des 1\,555 soudures, profil ISO 2560-A E~42~2,
+$k = 2$ : mesures de la base et prédictions hors pli des deux protocoles.}
+\label{fig:val_decisions}
+\end{figure}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Décisions sur la cohorte (règle retenue).}
+\label{tab:val_decisions}
+\begin{tabular}{@{}l rrr@{}}
+\toprule
+Source & VALIDÉ & PARTIEL & NON VALIDÉ \\
+\midrule
+Mesures                 & 51 (3,3\,\%) & 1\,274 (81,9\,\%) & 230 (14,8\,\%) \\
+Modèle KFold aléatoire  & 0            & 1\,538 (98,9\,\%) & 17 (1,1\,\%) \\
+Modèle GroupKFold       & 0            & 1\,555 (100\,\%)  & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Accord entre statut prédit et statut mesuré, sur les lignes où la
+mesure tranche. Part tranchée : prédictions C ou NC ; fausses acceptations :
+prédit C, mesuré NC, rapporté aux C prédits.}
+\label{tab:val_accord}
+\begin{tabular}{@{}l r ll ll@{}}
+\toprule
+ & & \multicolumn{2}{c}{Validation aléatoire} & \multicolumn{2}{c}{Validation groupée} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}
+Critère & Lignes & Part tranchée & Fausses acc. & Part tranchée & Fausses acc. \\
+\midrule
+\YS{} $\geq$ 420     & 706 & 51\,\% & 2/353 (0,6\,\%) & 16\,\% & 2/112 (1,8\,\%) \\
+\UTS{} $\geq$ 500    & 677 & 52\,\% & 0/350           & 19\,\% & 0/130 \\
+\UTS{} $\leq$ 640    & 677 & 56\,\% & 4/307 (1,3\,\%) & 9\,\%  & 1/43 (2,3\,\%) \\
+Allongement          & 631 & 60\,\% & 5/376 (1,3\,\%) & 27\,\% & 1/173 (0,6\,\%) \\
+KV($-20$\,°C)        & 465 & 86\,\% & 1/399 (0,3\,\%) & 7\,\%  & 0/34 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Lecture.}
+\begin{itemize}
+  \item \textbf{Mesures.} Seules 141 lignes ont les quatre cibles mesurées : 1\,253 des 1\,274 PARTIEL ont au moins une cible absente. Les 230 NON VALIDÉ échouent sur \YS{} (109), \UTS{} minimale (83), l'allongement (72) ou le Charpy (44), avec des recouvrements.
+  \item \textbf{Modèles.} Aucun VALIDÉ, conséquence directe de la plage d'\UTS{} vide (\cref{tab:limites}). Les 17 NON VALIDÉ du modèle aléatoire ne sont jamais contredits par la mesure : 7 sont confirmés, 10 ont une mesure incomplète.
+  \item \textbf{Calibration.} Les fausses acceptations par critère restent sous la borne de 2,3\,\% dans les deux protocoles, et un rejet prédit sur une borne basse n'est jamais contredit par la mesure : la bande $k = 2$ est prudente sur ces données.
+  \item \textbf{Pouvoir de décision.} Le modèle aléatoire tranche la moitié des critères de traction et 86\,\% des critères Charpy ; le modèle groupé n'en tranche que 7 à 27\,\%.
+  \item \textbf{Sensibilité.} Si l'on ignore \UTS{} $\leq$ 640\,MPa, le modèle aléatoire valide 125 soudures : la mesure en confirme 5, en contredit 2 (1,6\,\%) et ne permet pas de conclure pour 118. Le modèle groupé n'en valide toujours aucune. Rendre ce critère critique ajoute surtout des NON VALIDÉ.
+\end{itemize}
+
+\begin{precaution}
+Cette évaluation est rétrospective, sur les données qui ont servi à choisir les
+modèles. La RMSE est une erreur globale par cible ; pour Charpy, elle est
+estimée aux températures observées et appliquée à $-20$\,°C. Les règles sur les
+valeurs individuelles des éprouvettes ne peuvent pas être vérifiées avec une
+énergie moyenne prédite. Enfin, ces seuils concernent le métal fondu, pas un
+joint soudé complet. Des intervalles de prédiction propres à chaque soudure
+(par exemple CV+~\cite{barber_2021}) affineraient la règle.
+\end{precaution}
+
+\begin{aretenir}
+Avec le profil ISO 2560-A E~42~2 et une bande de garde de deux erreurs types,
+le modèle \textbf{ne valide aucune soudure} : la plage d'\UTS{} est plus étroite
+que l'incertitude. Ses décisions tranchées sont fiables (moins de 2,3\,\% de
+fausses acceptations par critère), mais rares pour une série nouvelle. Le modèle
+sert donc à \textbf{trier des candidats avant essai}, pas à qualifier une
+soudure ; le traitement de la borne haute d'\UTS{} reste un choix de risque.
+\end{aretenir}

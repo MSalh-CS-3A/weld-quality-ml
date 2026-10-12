@@ -1,0 +1,45 @@
+% =====================================================================
+%  Page de garde
+% =====================================================================
+\begin{titlepage}
+  \thispagestyle{empty}
+  \AddToShipoutPictureBG*{%
+    \AtPageUpperLeft{\color{csbordeaux}\rule[-0.9cm]{\paperwidth}{0.9cm}}%
+    \AtPageUpperLeft{\color{csgris}\rule[-1.05cm]{\paperwidth}{0.15cm}}%
+    \AtPageLowerLeft{\color{csgrisclair}\rule{\paperwidth}{2.2cm}}%
+  }
+
+  \centering
+  \vspace*{0.1cm}
+  \includegraphics[width=0.36\textwidth]{logo-centralesupelec}
+
+  \vspace{0.9cm}
+  {\large\color{csgris}\textsc{\Cours} --- \Etablissement\par}
+  \vspace{0.6cm}
+
+  {\color{csbordeaux}\rule{0.85\textwidth}{1.2pt}\par}
+  \vspace{0.5cm}
+  {\Huge\bfseries\color{csbordeaux}\TitreRapport\par}
+  \vspace{0.45cm}
+  {\Large\color{encre2}\SousTitreRapport\par}
+  \vspace{0.5cm}
+  {\color{csbordeaux}\rule{0.85\textwidth}{1.2pt}\par}
+
+  \vspace{0.9cm}
+  \begin{tabular}{@{}l l@{}}
+    \textbf{\AuteurUn}    & \href{mailto:\MailUn}{\texttt{\MailUn}} \\[0.25em]
+    \textbf{\AuteurDeux}  & \href{mailto:\MailDeux}{\texttt{\MailDeux}} \\[0.25em]
+    \textbf{\AuteurTrois} & \href{mailto:\MailTrois}{\texttt{\MailTrois}} \\
+  \end{tabular}
+
+  \vspace{0.7cm}
+  {\large \DateRapport\par}
+
+  \vfill
+  \begin{minipage}{0.86\textwidth}
+    \small\color{encre2}\centering
+    Données : Cambridge Weld Database (MAP\_DATA\_WELD), T.~Cool et H.~K.~D.~H.~Bhadeshia.
+    Code, protocoles et exports reproductibles : notebooks \texttt{01} à \texttt{09} du dépôt du projet.
+  \end{minipage}
+  \vspace{0.1cm}
+\end{titlepage}

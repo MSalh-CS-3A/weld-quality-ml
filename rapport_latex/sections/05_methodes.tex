@@ -1,0 +1,285 @@
+% =====================================================================
+%  5. Méthodes d'apprentissage
+% =====================================================================
+\clearpage
+\section{Méthodes d'apprentissage}
+\label{sec:methodes}
+
+Nous comparons cinq familles supervisées vues en cours, choisies pour couvrir des
+hypothèses différentes sur la forme de la relation entre conditions de soudage et
+propriétés, puis une sixième famille ajoutée ensuite, XGBoost (notebook 08), et une
+méthode semi-supervisée. Toutes sont implémentées avec
+scikit-learn~\cite{pedregosa_2011} et la bibliothèque XGBoost~\cite{chen_guestrin_2016}
+dans les notebooks 03 à 08. Dans la suite,
+$\{(\bm{x}_i, y_i)\}_{i=1}^{n}$ désigne l'ensemble d'entraînement d'un pli, après
+prétraitement.
+
+\subsection{Méthodes supervisées}
+
+\subsubsection{Référence : médiane de la cible}
+Le modèle constant $\hat{y} = \operatorname{médiane}(y_1,\dots,y_n)$ ignore
+complètement $\bm{x}$. Il fixe le \textbf{gain minimal} à dépasser : un modèle qui
+ne fait pas mieux n'apprend rien d'utile des conditions de soudage. La médiane
+minimise l'erreur absolue moyenne parmi les prédicteurs constants, ce qui en fait
+la référence naturelle pour la MAE.
+
+\subsubsection{Régression Ridge}
+La régression Ridge~\cite{hoerl_1970} est une régression linéaire pénalisée :
+\begin{equation}
+  \hat{\bm{\beta}} = \arg\min_{\bm{\beta}}\; \sum_{i=1}^{n}\bigl(y_i - \beta_0 - \bm{x}_i^{\top}\bm{\beta}\bigr)^2 + \alpha\,\lVert\bm{\beta}\rVert_2^2 .
+\end{equation}
+La pénalité $\alpha$ réduit l'amplitude des coefficients et stabilise
+l'estimation lorsque des entrées sont corrélées (courant, tension et apport
+thermique, par exemple). Ridge sert de \textbf{contrôle linéaire} : si un modèle
+non linéaire fait beaucoup mieux, la relation contient des non-linéarités ou des
+interactions.
+
+\subsubsection{Régression à vecteurs de support (SVR) à noyau RBF}
+La SVR~\cite{smola_2004} cherche une fonction $f(\bm{x}) = \langle \bm{w}, \phi(\bm{x})\rangle + b$
+aussi \og plate \fg{} que possible, en ignorant les erreurs inférieures à
+$\varepsilon$ (perte $\varepsilon$-insensible) :
+\begin{gather}
+  \min_{\bm{w}, b}\; \tfrac{1}{2}\lVert\bm{w}\rVert^2 + C\sum_{i=1}^{n}\max\bigl(0,\, |y_i - f(\bm{x}_i)| - \varepsilon\bigr), \\
+  k(\bm{x},\bm{x}') = \langle\phi(\bm{x}),\phi(\bm{x}')\rangle = \exp\bigl(-\gamma\lVert\bm{x}-\bm{x}'\rVert^2\bigr).
+\end{gather}
+Le noyau gaussien (RBF) permet des relations non linéaires lisses. $C$ règle le
+compromis entre régularité et ajustement, $\gamma$ la portée du noyau et
+$\varepsilon$ la largeur du tube de tolérance. Comme $\varepsilon$ s'exprime dans
+l'unité de $y$, la cible est standardisée dans le train
+(\texttt{TransformedTargetRegressor}) puis les prédictions sont reconverties.
+
+\subsubsection{Forêt aléatoire}
+Une forêt aléatoire~\cite{breiman_2001} moyenne $B$ arbres de régression, chacun
+appris sur un échantillon bootstrap et choisissant ses coupures parmi un
+sous-ensemble aléatoire de variables :
+\begin{equation}
+  \hat{y}(\bm{x}) = \frac{1}{B}\sum_{b=1}^{B} T_b(\bm{x}).
+\end{equation}
+Les arbres capturent les interactions et les effets de seuil (par exemple un
+traitement thermique au-delà d'une certaine température) ; la moyenne réduit la
+variance. La méthode est insensible aux transformations monotones des entrées et
+robuste à des entrées peu informatives. Nous fixons $B = 300$ arbres et la
+graine 42, et réglons la taille minimale des feuilles, la profondeur maximale et
+la fraction de variables candidates à chaque coupure.
+
+\subsubsection{$k$ plus proches voisins}
+Le $k$NN~\cite{cover_1967} prédit la moyenne des cibles des $k$ voisins les plus
+proches dans l'espace standardisé :
+\begin{gather}
+  \hat{y}(\bm{x}) = \frac{1}{k}\sum_{i \in \mathcal{N}_k(\bm{x})} y_i, \\
+  d_p(\bm{x},\bm{x}') = \Bigl(\sum_j |x_j - x'_j|^p\Bigr)^{1/p}, \quad p = 1 \text{ (L1, Manhattan) ou } p = 2 \text{ (L2, euclidienne)}.
+\end{gather}
+C'est une méthode locale et sans hypothèse de forme. Elle est aussi le
+\textbf{pendant supervisé de COREG}, qui repose sur deux $k$NN : la comparer
+directement permet d'isoler l'effet des pseudo-labels.
+
+\subsubsection{XGBoost (\emph{gradient boosting} d'arbres)}
+XGBoost~\cite{chen_guestrin_2016} construit un modèle \emph{additif} : chaque
+nouvel arbre $f_m$ corrige les résidus des précédents, avec un pas d'apprentissage
+$\eta$, et l'objectif pénalise la complexité des arbres :
+\begin{gather}
+  \hat{y}^{(M)}(\bm{x}) = \hat{y}^{(0)} + \eta \sum_{m=1}^{M} f_m(\bm{x}), \\
+  \mathcal{L} = \sum_{i=1}^{n} \bigl(y_i - \hat{y}_i\bigr)^2 + \sum_{m=1}^{M}\Bigl(\gamma T_m + \tfrac{\lambda}{2}\lVert \bm{w}_m\rVert_2^2\Bigr),
+\end{gather}
+où $T_m$ est le nombre de feuilles et $\bm{w}_m$ les valeurs des feuilles de
+l'arbre $m$. Contrairement à la forêt, qui moyenne des arbres indépendants pour
+réduire la variance, le \emph{boosting} réduit le biais en ajoutant des arbres
+peu profonds de façon séquentielle. Nous réglons la profondeur, $\eta$ et le
+nombre d'arbres ; sont fixés \texttt{min\_child\_weight}~=~5, un
+sous-échantillonnage de 80\,\% des lignes et des variables par arbre,
+$\lambda = 1$, $\gamma = 0$, la méthode d'histogrammes, la graine 42 et aucun
+arrêt précoce. Les NaN sont imputés par la médiane du train comme pour les autres
+familles, afin de comparer à préparation identique : la gestion native des
+valeurs manquantes de XGBoost n'est pas évaluée.
+
+\subsubsection{Grilles d'hyperparamètres}
+
+Le \cref{tab:grilles} donne les grilles explorées. Elles ont été fixées
+\emph{avant} les entraînements comme budgets raisonnables, et non optimisées a
+posteriori. Au total, \textbf{39 configurations} sont évaluées par cible et par
+pli externe pour les cinq premières familles, puis \textbf{51} avec les 12
+configurations XGBoost.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Familles supervisées, rôle dans la comparaison et grilles d'hyperparamètres.}
+\label{tab:grilles}
+\begin{tabularx}{\textwidth}{@{}l L l r@{}}
+\toprule
+Famille & Rôle & Grille & Config. \\
+\midrule
+Médiane de $y$ & Gain minimal à dépasser & aucune & 1 \\
+Ridge & Contrôle linéaire régularisé & $\alpha \in \{0{,}01;\,0{,}1;\,1;\,10;\,100;\,1\,000\}$ & 6 \\
+SVR RBF & Non-linéarité lisse à noyau & \makecell[l]{$C\in\{1,10,100\}$, $\gamma\in\{\text{scale}, 0{,}05\}$,\\ $\varepsilon\in\{0{,}05;\,0{,}2\}$} & 12 \\
+Forêt aléatoire & Interactions et seuils & \makecell[l]{300 arbres ; feuille $\in\{1,2,5\}$,\\ profondeur $\in\{\text{libre}, 10\}$, \texttt{max\_features} $\in\{0{,}5;\,1\}$} & 12 \\
+$k$NN & Méthode locale, contrôle de COREG & $k\in\{3,5,9,15\}$, $p\in\{1,2\}$, poids uniformes & 8 \\
+XGBoost & \emph{Boosting} d'arbres, réduction du biais & \makecell[l]{profondeur $\in\{2,4,6\}$, $\eta\in\{0{,}03;\,0{,}1\}$,\\ arbres $\in\{150, 300\}$} & 12 \\
+\midrule
+\multicolumn{3}{@{}l}{Total par cible et par pli externe (cinq familles, puis six)} & 39 / 51 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{decision}
+Le critère de réglage est la \textbf{MAE interne moyenne} (\cref{subsec:metriques}).
+Elle s'exprime dans l'unité de la cible et est moins dominée que la RMSE par
+quelques séries très mal prédites. La famille elle-même peut être choisie dans la
+boucle interne : on parle alors de \og sélection interne \fg{}, procédure dont le
+score externe est une estimation honnête (\cref{sec:protocole}).
+\end{decision}
+
+\subsection{Apprentissage semi-supervisé : revue bibliographique}
+\label{subsec:ssl_biblio}
+
+L'apprentissage semi-supervisé cherche à améliorer un prédicteur en utilisant, en
+plus des exemples étiquetés $\mathcal{D}_L$, des exemples non étiquetés
+$\mathcal{D}_U$~\cite{chapelle_2006,vanengelen_2020}. Il n'aide que si la
+distribution des entrées renseigne sur la fonction à apprendre, ce qui suppose
+l'une des hypothèses suivantes :
+\begin{itemize}
+  \item \textbf{régularité} : deux entrées proches ont des sorties proches ;
+  \item \textbf{amas} : les points d'un même amas partagent une sortie similaire ;
+  \item \textbf{variété} : les données vivent près d'une variété de faible dimension.
+\end{itemize}
+
+Les principales familles de méthodes sont résumées au \cref{tab:ssl_familles}.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Grandes familles de méthodes semi-supervisées et adéquation au projet.}
+\label{tab:ssl_familles}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.2cm} L L@{}}
+\toprule
+Famille & Principe & Adéquation à notre problème \\
+\midrule
+Auto-apprentissage (\emph{self-training})~\cite{yarowsky_1995} & Un modèle étiquette ses prédictions les plus sûres et se réentraîne dessus & Simple, mais risque de renforcer ses propres erreurs ; la \og confiance \fg{} est mal définie en régression \\
+Co-apprentissage (\emph{co-training})~\cite{blum_mitchell_1998} & Deux modèles sur deux vues indépendantes s'étiquettent mutuellement & Conçu pour la classification et pour deux vues naturelles, absentes ici \\
+Méthodes à graphe (propagation de labels)~\cite{zhu_ghahramani_2002} & Les labels diffusent le long d'un graphe de similarité & Essentiellement transductives ; graphe sensible aux absences et aux échelles \\
+Modèles génératifs, SVM transductives~\cite{chapelle_2006} & Modéliser $p(\bm{x}, y)$ ou placer la frontière dans les zones peu denses & Pensés surtout pour la classification \\
+Régularisation par cohérence (réseaux profonds)~\cite{vanengelen_2020} & Prédictions stables sous perturbation & Exigent de grands volumes de données \\
+\textbf{COREG}~\cite{zhou_li_2005} & Co-apprentissage pour la \textbf{régression}, deux $k$NN, confiance par réduction locale d'erreur & \textbf{Retenu} : conçu pour la régression, inductif, peu coûteux \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{decision}
+Nous retenons \textbf{COREG} (\emph{CO-training REGressors}) de Zhou et
+Li~\cite{zhou_li_2005}, pour cinq raisons :
+\begin{enumerate}[leftmargin=1.5em]
+  \item il est \textbf{conçu pour la régression}, alors que la plupart des méthodes le sont pour la classification ;
+  \item il définit une \textbf{confiance mesurable} pour une prédiction numérique : la baisse d'erreur locale qu'elle provoque ;
+  \item il n'exige pas deux vues naturelles indépendantes : la diversité provient de \textbf{deux métriques de distance} ;
+  \item il repose sur le $k$NN, méthode vue en cours, ce qui permet un \textbf{contrôle supervisé exact} (mêmes $k$NN, mêmes labels, sans pseudo-labels) ;
+  \item il est \textbf{inductif} : le modèle final prédit de nouvelles soudures sans réapprentissage, ce qui correspond à l'usage visé.
+\end{enumerate}
+\end{decision}
+
+\subsection{L'algorithme COREG}
+\label{subsec:coreg_algo}
+
+COREG entraîne deux régresseurs $k$NN, $h_1$ (distance L1) et $h_2$ (distance L2),
+sur les mêmes labels. À chaque tour, chaque régresseur examine des candidats du
+pool $U$ et estime leur \textbf{confiance} : pour un candidat $\bm{x}_u$, on
+calcule sa prédiction $\hat{y}_u = h_j(\bm{x}_u)$, on ajoute temporairement
+$(\bm{x}_u, \hat{y}_u)$ au jeu de $h_j$ pour obtenir $h'_j$, puis on mesure la
+réduction d'erreur quadratique sur les $k$ voisins étiquetés $\Omega_u$ de $\bm{x}_u$ :
+\begin{equation}
+  \Delta_u = \sum_{\bm{x}_i \in \Omega_u}\Bigl[\bigl(y_i - h_j(\bm{x}_i)\bigr)^2 - \bigl(y_i - h'_j(\bm{x}_i)\bigr)^2\Bigr].
+  \label{eq:coreg_gain}
+\end{equation}
+Le candidat de plus grand gain positif est \textbf{transmis à l'autre régresseur},
+qui l'ajoute à ses données comme pseudo-label. La prédiction finale est la
+moyenne $\hat{y} = \tfrac{1}{2}\bigl(h_1(\bm{x}) + h_2(\bm{x})\bigr)$. La
+\cref{fig:coreg} et l'\cref{algo:coreg} résument la procédure.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  reg/.style={rectangle, rounded corners=3pt, draw=csbordeaux, line width=0.7pt,
+              fill=csgrisclair, align=center, text width=3.1cm, minimum height=1.3cm, font=\footnotesize},
+  pool/.style={ellipse, draw=csgris, line width=0.6pt, fill=white, align=center,
+               minimum width=3.2cm, minimum height=1.25cm, font=\footnotesize},
+  fl/.style={-{Stealth[length=2mm]}, line width=0.8pt},
+  lab/.style={font=\scriptsize, align=center}]
+  \node[pool] (U) {Pool $U$ sans label\\ (train du pli seulement)};
+  \node[reg, below left=0.9cm and 0.6cm of U] (h1) {$h_1$ : $k$NN, distance L1\\ labels $L$ + pseudo-labels de $h_2$};
+  \node[reg, below right=0.9cm and 0.6cm of U] (h2) {$h_2$ : $k$NN, distance L2\\ labels $L$ + pseudo-labels de $h_1$};
+  \node[reg, below=2.3cm of U, fill=white, draw=csgris, text width=3.6cm] (out) {Prédiction finale\\ $\hat{y} = \frac{1}{2}\bigl(h_1(\bm{x}) + h_2(\bm{x})\bigr)$};
+  \draw[fl, color=csgris] (U) -- node[lab, left=2pt] {candidats\\ ($\leq 100$)} (h1);
+  \draw[fl, color=csgris] (U) -- node[lab, right=2pt] {candidats\\ ($\leq 100$)} (h2);
+  \draw[fl, color=orangeviz, bend left=12] (h1.east) to node[lab, above] {meilleur $\Delta_u>0$} (h2.west);
+  \draw[fl, color=bleuviz, bend left=12] (h2.west) to node[lab, below] {meilleur $\Delta_u>0$} (h1.east);
+  \draw[fl, color=csgris] (h1.south) |- (out.west);
+  \draw[fl, color=csgris] (h2.south) |- (out.east);
+\end{tikzpicture}
+\caption{Principe de COREG. Chaque $k$NN choisit dans le pool l'exemple dont sa
+propre prédiction réduit le plus l'erreur locale, puis le transmet à l'autre
+$k$NN comme pseudo-label.}
+\label{fig:coreg}
+\end{figure}
+
+\begin{algorithm}[htbp]
+\caption{COREG tel qu'implémenté dans le notebook 07 (un pli, une cible)}
+\label{algo:coreg}
+\small
+\begin{algorithmic}[1]
+\Require labels du train $L$ (prétraités), pool $U$ du train, $k$, $T_{\max}=100$, $N_{\text{cand}}=100$
+\State Ajuster le prétraitement sur $L$ ; le figer ; transformer $U$
+\State Dédupliquer $U$ par représentation exacte ; retirer les $\bm{x}$ déjà présents dans $L$
+\State $L_1 \gets L$, $L_2 \gets L$ ; $h_1 \gets k\text{NN}_{L1}(L_1)$, $h_2 \gets k\text{NN}_{L2}(L_2)$
+\For{$t = 1, \dots, T_{\max}$}
+  \State Tirer (graine dérivée du pli) au plus $N_{\text{cand}}$ candidats actifs $U' \subseteq U$
+  \For{$j \in \{1, 2\}$}
+    \State Pour chaque $\bm{x}_u \in U'$ : $\hat{y}_u \gets h_j(\bm{x}_u)$ et calculer $\Delta_u$ (\cref{eq:coreg_gain})
+    \State $u_j^\star \gets \arg\max_u \Delta_u$ ; retenir si $\Delta_{u_j^\star} > \tau = 10^{-12}\max(1, \operatorname{var}(y))\,k$
+    \State Retirer $\bm{x}_{u_j^\star}$ de $U'$ et de $U$
+  \EndFor
+  \State $L_2 \gets L_2 \cup \{(\bm{x}_{u_1^\star}, \hat{y}_{u_1^\star})\}$, $L_1 \gets L_1 \cup \{(\bm{x}_{u_2^\star}, \hat{y}_{u_2^\star})\}$ ; mettre à jour $h_1, h_2$
+  \If{aucun ajout accepté \textbf{ou} $U$ épuisé}
+    \State \textbf{arrêter}
+  \EndIf
+\EndFor
+\State \Return $\hat{y}(\bm{x}) = \frac{1}{2}\bigl(h_1(\bm{x}) + h_2(\bm{x})\bigr)$
+\end{algorithmic}
+\end{algorithm}
+
+Le \cref{tab:coreg_choix} distingue ce qui vient de l'article original et ce
+qui relève de nos choix d'implémentation, tous fixés \emph{avant} le calcul.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Paramétrage de COREG et écarts à l'article original.}
+\label{tab:coreg_choix}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{3.4cm} L@{}}
+\toprule
+Élément & Choix du projet \\
+\midrule
+Régresseurs & Deux $k$NN uniformes sur les mêmes 16 entrées $+$ procédé ; distances L1 et L2 (l'article utilise des distances de Minkowski d'ordres 2 et 5) \\
+Nombre de voisins & Même $k$ pour les deux, choisi dans $\{3, 5, 9, 15\}$ par MAE interne \\
+Prétraitement & Appris sur les vrais labels du train, figé pendant toute la boucle \\
+Confiance & \cref{eq:coreg_gain} ; voisinage dans le jeu courant, pseudo-labels précédents inclus ; mise à jour exacte vérifiée contre un réapprentissage explicite \\
+Candidats et tours & Au plus 100 candidats actifs par tour, au plus 100 tours, un ajout par régresseur et par tour, aucun identifiant ajouté deux fois \\
+Pool & Déduplication des représentations identiques (plus petit identifiant conservé) ; retrait des $\bm{x}$ déjà présents dans les vrais labels \\
+Arrêt & Pool épuisé, aucun gain positif dans le pool actif, ou 100 tours ; jamais sur un label de validation \\
+Égalités & Ordre stable : vrais labels triés par identifiant, puis représentants du pool \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{precaution}
+Un pseudo-label est une \emph{estimation}, pas une mesure mécanique. Le gain
+local $\Delta_u$ mesure la cohérence d'une prédiction avec ses voisins étiquetés ;
+il ne garantit pas qu'elle soit exacte, et deux $k$NN qui partagent les mêmes
+entrées peuvent propager une même erreur.
+\end{precaution}
+
+\begin{aretenir}
+Six familles supervisées couvrent le constant, le linéaire, le non-linéaire lisse,
+les arbres (moyennés ou boostés) et le local ; 51 configurations sont réglées par
+MAE interne.
+COREG est retenu comme méthode semi-supervisée parce qu'il est conçu pour la
+régression, inductif et directement comparable à un contrôle $k$NN supervisé.
+\end{aretenir}

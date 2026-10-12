@@ -1,0 +1,159 @@
+% =====================================================================
+%  Annexe C — Tableaux complémentaires
+% =====================================================================
+\section{Tableaux complémentaires}
+\label{annexe:tableaux}
+
+\subsection{Familles supervisées, configuration 16/médiane (six familles)}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Validation aléatoire : chaque famille réglée en interne (moyenne $\pm$
+écart-type sur 5 plis ; RMSE moyenne).}
+\label{tab:annexe_aleatoire}
+\begin{tabular}{@{}l l r r r@{}}
+\toprule
+Cible & Modèle & MAE & RMSE & $R^2$ \\
+\midrule
+\YS{} (MPa) & Médiane de $y$  & 70,032 $\pm$ 4,087 & 92,774 & $-0{,}031 \pm 0{,}040$ \\
+            & Ridge           & 54,047 $\pm$ 3,440 & 70,005 & $0{,}412 \pm 0{,}053$ \\
+            & SVR RBF         & 31,747 $\pm$ 3,900 & 45,403 & $0{,}754 \pm 0{,}046$ \\
+            & Forêt aléatoire & 31,242 $\pm$ 4,038 & 44,172 & $0{,}765 \pm 0{,}064$ \\
+            & $k$NN           & 38,144 $\pm$ 2,497 & 56,273 & $0{,}619 \pm 0{,}059$ \\
+            & XGBoost         & 26,334 $\pm$ 2,735 & 39,147 & $0{,}816 \pm 0{,}043$ \\
+\midrule
+\UTS{} (MPa) & Médiane de $y$ & 68,879 $\pm$ 4,438 & 91,419 & $-0{,}050 \pm 0{,}019$ \\
+             & Ridge          & 44,319 $\pm$ 3,535 & 60,137 & $0{,}538 \pm 0{,}118$ \\
+             & SVR RBF        & 23,861 $\pm$ 0,906 & 35,989 & $0{,}836 \pm 0{,}027$ \\
+             & Forêt aléatoire & 26,906 $\pm$ 1,907 & 39,165 & $0{,}805 \pm 0{,}045$ \\
+             & $k$NN          & 33,452 $\pm$ 4,870 & 48,626 & $0{,}697 \pm 0{,}098$ \\
+             & XGBoost        & 22,542 $\pm$ 2,245 & 34,863 & $0{,}845 \pm 0{,}044$ \\
+\midrule
+Allong. (pts) & Médiane de $y$ & 4,019 $\pm$ 0,149 & 4,903 & $-0{,}015 \pm 0{,}019$ \\
+              & Ridge          & 3,011 $\pm$ 0,152 & 3,923 & $0{,}345 \pm 0{,}119$ \\
+              & SVR RBF        & 2,268 $\pm$ 0,198 & 3,227 & $0{,}556 \pm 0{,}094$ \\
+              & Forêt aléatoire & 2,054 $\pm$ 0,239 & 2,835 & $0{,}660 \pm 0{,}058$ \\
+              & $k$NN          & 2,423 $\pm$ 0,260 & 3,305 & $0{,}530 \pm 0{,}117$ \\
+              & XGBoost        & 2,021 $\pm$ 0,146 & 2,858 & $0{,}654 \pm 0{,}039$ \\
+\midrule
+\charpy{} (J) & Médiane de $y$ & 36,756 $\pm$ 2,813 & 51,989 & $-0{,}069 \pm 0{,}037$ \\
+              & Ridge          & 26,913 $\pm$ 0,587 & 34,170 & $0{,}529 \pm 0{,}113$ \\
+              & SVR RBF        & 17,393 $\pm$ 0,988 & 25,068 & $0{,}749 \pm 0{,}043$ \\
+              & Forêt aléatoire & 16,099 $\pm$ 1,027 & 22,636 & $0{,}795 \pm 0{,}035$ \\
+              & $k$NN          & 19,253 $\pm$ 1,518 & 29,586 & $0{,}651 \pm 0{,}055$ \\
+              & XGBoost        & 14,151 $\pm$ 0,724 & 19,707 & $0{,}845 \pm 0{,}026$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Validation groupée : chaque famille réglée en interne (moyenne $\pm$
+écart-type sur 5 plis ; RMSE moyenne).}
+\label{tab:annexe_groupee}
+\begin{tabular}{@{}l l r r r@{}}
+\toprule
+Cible & Modèle & MAE & RMSE & $R^2$ \\
+\midrule
+\YS{} (MPa) & Médiane de $y$  & 70,449 $\pm$ 10,682 & 92,501 & $-0{,}073 \pm 0{,}052$ \\
+            & Ridge           & 69,387 $\pm$ 6,953  & 88,202 & $-0{,}025 \pm 0{,}362$ \\
+            & SVR RBF         & 59,350 $\pm$ 9,755  & 76,275 & $0{,}264 \pm 0{,}144$ \\
+            & Forêt aléatoire & 54,139 $\pm$ 10,658 & 69,570 & $0{,}390 \pm 0{,}132$ \\
+            & $k$NN           & 73,496 $\pm$ 9,189  & 94,956 & $-0{,}140 \pm 0{,}151$ \\
+            & XGBoost         & 54,363 $\pm$ 9,820  & 70,263 & $0{,}367 \pm 0{,}167$ \\
+\midrule
+\UTS{} (MPa) & Médiane de $y$ & 72,664 $\pm$ 15,237 & 93,729 & $-0{,}180 \pm 0{,}114$ \\
+             & Ridge          & 61,898 $\pm$ 13,272 & 77,232 & $0{,}179 \pm 0{,}152$ \\
+             & SVR RBF        & 52,861 $\pm$ 11,679 & 70,542 & $0{,}316 \pm 0{,}145$ \\
+             & Forêt aléatoire & 48,905 $\pm$ 7,269 & 65,236 & $0{,}394 \pm 0{,}160$ \\
+             & $k$NN          & 68,538 $\pm$ 14,821 & 90,258 & $-0{,}115 \pm 0{,}121$ \\
+             & XGBoost        & 50,215 $\pm$ 6,720  & 65,165 & $0{,}392 \pm 0{,}178$ \\
+\midrule
+Allong. (pts) & Médiane de $y$ & 4,086 $\pm$ 0,309 & 4,962 & $-0{,}062 \pm 0{,}047$ \\
+              & Ridge          & 3,658 $\pm$ 0,362 & 4,735 & $0{,}016 \pm 0{,}229$ \\
+              & SVR RBF        & 3,670 $\pm$ 0,345 & 4,534 & $0{,}106 \pm 0{,}167$ \\
+              & Forêt aléatoire & 3,339 $\pm$ 0,342 & 4,218 & $0{,}226 \pm 0{,}146$ \\
+              & $k$NN          & 3,983 $\pm$ 0,328 & 4,908 & $-0{,}060 \pm 0{,}223$ \\
+              & XGBoost        & 3,322 $\pm$ 0,381 & 4,196 & $0{,}238 \pm 0{,}148$ \\
+\midrule
+\charpy{} (J) & Médiane de $y$ & 36,035 $\pm$ 16,909 & 50,603 & $-0{,}149 \pm 0{,}251$ \\
+              & Ridge          & 34,752 $\pm$ 10,268 & 45,433 & $0{,}069 \pm 0{,}213$ \\
+              & SVR RBF        & 35,963 $\pm$ 8,404  & 44,879 & $0{,}091 \pm 0{,}206$ \\
+              & Forêt aléatoire & 33,033 $\pm$ 10,974 & 43,560 & $0{,}138 \pm 0{,}209$ \\
+              & $k$NN          & 35,725 $\pm$ 12,222 & 48,624 & $-0{,}099 \pm 0{,}354$ \\
+              & XGBoost        & 35,450 $\pm$ 11,126 & 45,293 & $0{,}069 \pm 0{,}247$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{COREG : dispersion et scores OOF}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{COREG : moyenne $\pm$ écart-type sur les plis et scores OOF réunis.}
+\label{tab:annexe_coreg}
+\begin{tabular}{@{}l l r r r r@{}}
+\toprule
+Protocole & Cible & MAE moyenne & $R^2$ moyen & MAE OOF & $R^2$ OOF \\
+\midrule
+Aléatoire & \YS{} (MPa)   & 37,919 $\pm$ 3,151  & $0{,}629 \pm 0{,}060$ & 37,913 & 0,631 \\
+          & \UTS{} (MPa)  & 33,037 $\pm$ 4,905  & $0{,}709 \pm 0{,}093$ & 33,038 & 0,707 \\
+          & Allong. (pts) & 2,402 $\pm$ 0,258   & $0{,}535 \pm 0{,}112$ & 2,403  & 0,538 \\
+Groupé    & \YS{} (MPa)   & 71,074 $\pm$ 14,263 & $-0{,}056 \pm 0{,}181$ & 71,780 & $-0{,}051$ \\
+          & \UTS{} (MPa)  & 63,060 $\pm$ 15,175 & $0{,}043 \pm 0{,}193$ & 61,470 & 0,146 \\
+          & Allong. (pts) & 3,904 $\pm$ 0,311   & $-0{,}028 \pm 0{,}183$ & 3,883  & 0,018 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Sensibilité de COREG à la graine de tirage des candidats ($k$ fixé par la
+sélection interne du calcul principal) : MAE moyenne et $R^2$ moyen.}
+\label{tab:annexe_graines}
+\begin{tabular}{@{}l l rr rr rr@{}}
+\toprule
+ & & \multicolumn{2}{c}{Graine 42} & \multicolumn{2}{c}{Graine 43} & \multicolumn{2}{c}{Graine 44} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Protocole & Cible & MAE & $R^2$ & MAE & $R^2$ & MAE & $R^2$ \\
+\midrule
+Aléatoire & \YS     & 37,919 & 0,629 & 37,990 & 0,628 & 38,203 & 0,627 \\
+          & \UTS    & 33,037 & 0,709 & 32,976 & 0,709 & 33,314 & 0,703 \\
+          & Allong. & 2,402  & 0,535 & 2,397  & 0,535 & 2,396  & 0,538 \\
+Groupé    & \YS     & 71,074 & $-0{,}056$ & 70,873 & $-0{,}054$ & 70,868 & $-0{,}051$ \\
+          & \UTS    & 63,060 & 0,043 & 62,707 & 0,049 & 63,083 & 0,040 \\
+          & Allong. & 3,904  & $-0{,}028$ & 3,887 & $-0{,}018$ & 3,888 & $-0{,}023$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Reconstruction de valeurs Ni/Cr/Mo masquées}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Erreur absolue moyenne (\% massique) de reconstruction de 20\,\% des
+valeurs observées de Ni, Cr et Mo masquées en validation, imputeur ajusté sur le
+train ; mêmes cellules pour les deux méthodes.}
+\label{tab:annexe_masquage}
+\begin{tabular}{@{}l l rr rr rr@{}}
+\toprule
+ & & \multicolumn{2}{c}{Ni} & \multicolumn{2}{c}{Cr} & \multicolumn{2}{c}{Mo} \\
+\cmidrule(lr){3-4}\cmidrule(lr){5-6}\cmidrule(lr){7-8}
+Contexte & Imputation & $n$ & MAE & $n$ & MAE & $n$ & MAE \\
+\midrule
+\YS     & médiane   & 71 & 0,388 & 71 & 1,612 & 70 & 0,388 \\
+        & itérative & 71 & 0,419 & 71 & 1,419 & 70 & 0,313 \\
+\UTS    & médiane   & 45 & 0,439 & 52 & 1,556 & 43 & 0,370 \\
+        & itérative & 45 & 0,537 & 52 & 1,705 & 43 & 0,399 \\
+Allong. & médiane   & 58 & 0,325 & 64 & 1,098 & 58 & 0,407 \\
+        & itérative & 58 & 0,723 & 64 & 1,945 & 58 & 0,362 \\
+Charpy  & médiane   & 33 & 0,782 & 40 & 1,504 & 30 & 0,696 \\
+        & itérative & 33 & 1,035 & 40 & 4,792 & 30 & 1,060 \\
+\bottomrule
+\end{tabular}
+\end{table}

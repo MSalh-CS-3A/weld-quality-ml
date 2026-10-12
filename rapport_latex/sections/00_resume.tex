@@ -1,0 +1,100 @@
+% =====================================================================
+%  Résumé, guide de lecture et conventions
+% =====================================================================
+\section*{Résumé}
+\addcontentsline{toc}{section}{Résumé}
+
+Ce rapport documente l'ensemble d'un projet d'apprentissage automatique visant
+à prédire des propriétés mécaniques de soudures d'acier, utilisées ici comme
+indicateurs mesurables de la \og qualité \fg{} d'une soudure. Les données
+proviennent de la \emph{Cambridge Weld Database} : 1\,652 dépôts de soudure
+décrits par 44 champs (composition chimique, paramètres de soudage, traitement
+thermique après soudage, propriétés mécaniques et microstructure)~\cite{cool_welddb}.
+
+L'analyse exploratoire montre une base \emph{hétérogène}, compilée à partir de
+nombreuses publications : beaucoup de valeurs non rapportées, des valeurs
+censurées ou annotées, des unités douteuses, des absences qui dépendent du
+procédé et surtout des \emph{séries expérimentales} dont les observations sont
+apparentées. Nous traduisons le problème en quatre régressions indépendantes :
+limite d'élasticité (\YS), résistance maximale à la traction (\UTS),
+allongement et, à titre exploratoire, énergie Charpy à température d'essai connue.
+
+La préparation est entièrement traçable : nettoyage déterministe, provenance de
+66\,080 cellules, déduplication, cohorte principale de 1\,555 lignes réparties
+en 44 séries, puis prétraitement (standardisation, encodage, imputation)
+\emph{appris uniquement dans les plis d'entraînement}. Six familles supervisées
+--- médiane, Ridge, SVR à noyau RBF, forêt aléatoire, $k$ plus proches voisins et
+XGBoost --- sont comparées par validation croisée \emph{imbriquée} selon deux scénarios :
+un découpage aléatoire des lignes et un découpage par séries, qui teste le
+transfert à des séries absentes de l'entraînement. La méthode semi-supervisée
+COREG~\cite{zhou_li_2005} est ensuite appliquée selon un protocole inductif.
+
+Avec 16 entrées numériques, le procédé et une imputation médiane, la procédure
+supervisée qui choisit la famille parmi les six atteint des \Rdeux{} moyens de
+0,816 (\YS), 0,830 (\UTS), 0,646 (allongement) et 0,845 (Charpy) en validation
+aléatoire, mais seulement 0,367, 0,307, 0,260 et 0,058 lorsque des séries entières
+sont tenues à l'écart. XGBoost est la meilleure famille sur des séries connues ;
+il ne résout pas le transfert à de nouvelles séries. COREG n'améliore pas la
+référence supervisée. Les diagnostics attribuent une large part de l'erreur à des
+décalages de niveau entre séries.
+
+Pour traduire ces prédictions en décision de qualité, des seuils sont tirés des
+normes de classification du métal fondu (ISO~2560-A, classe E~42~2 : \YS{} $\geq$
+420\,MPa, \UTS{} 500--640\,MPa, allongement $\geq$ 20\,\%, 47\,J à $-20$\,°C)
+et appliqués avec une bande de garde de deux erreurs types (JCGM~106). Le modèle
+ne valide alors aucune soudure : il peut trier des candidats, pas remplacer
+l'essai. La conclusion principale est donc méthodologique : prédire une série
+déjà représentée est réaliste, prédire une nouvelle étude reste difficile avec
+les entrées disponibles. Les recommandations portent sur la collecte et
+l'évaluation des données ; aucun réglage de soudage « optimal » n'est déduit de
+ces associations.
+
+\medskip
+\noindent\textbf{Mots-clés :} soudage, aciers, propriétés mécaniques, régression,
+données manquantes, validation croisée imbriquée, GroupKFold, forêt aléatoire,
+SVR, XGBoost, apprentissage semi-supervisé, COREG, seuils normatifs, ISO~2560.
+
+\subsection*{Guide de lecture}
+
+Le rapport suit l'ordre chronologique et logique du projet. Chaque section se
+termine par un encadré \og À retenir \fg{} qui résume ce qu'il faut garder en tête.
+Les encadrés \og Décision et justification \fg{} expliquent chaque choix de
+conception, et les encadrés \og Précaution d'interprétation \fg{} signalent ce
+que les résultats \emph{ne} démontrent \emph{pas}.
+
+\begin{center}
+\small
+\begin{tabularx}{\textwidth}{@{}>{\bfseries}l L@{}}
+\toprule
+Section & Contenu \\
+\midrule
+\ref{sec:intro}      & Problématique industrielle et traduction en tâche d'apprentissage \\
+\ref{sec:eda}        & Analyse exploratoire (EDA) : structure, absences, distributions, cibles, ACP \\
+\ref{sec:cibles}     & Choix des variables cibles et stratégie de prédiction \\
+\ref{sec:prep}       & Préparation des données et prétraitement appris dans les plis \\
+\ref{sec:methodes}   & Méthodes supervisées et méthode semi-supervisée (bibliographie, COREG) \\
+\ref{sec:protocole}  & Protocole de validation croisée imbriquée et métriques \\
+\ref{sec:resultats}  & Résultats d'entraînement supervisé \\
+\ref{sec:diag}       & Diagnostics des performances et explicabilité \\
+\ref{sec:ssl}        & Résultats semi-supervisés (COREG) \\
+\ref{sec:validation} & Seuils normatifs et validation des soudures \\
+\ref{sec:discussion} & Analyse comparative, limites et recommandations \\
+\ref{sec:conclusion} & Conclusion et perspectives \\
+Annexes              & Dictionnaire des variables, reproductibilité, tableaux complets, glossaire \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection*{Notations et conventions}
+
+\begin{itemize}
+  \item \textbf{\YS} : limite d'élasticité (\emph{yield strength}, MPa) ;
+        \textbf{\UTS} : résistance maximale à la traction (\emph{ultimate tensile strength}, MPa) ;
+        \textbf{Allongement} : allongement à rupture (\%, erreurs en points de \%) ;
+        \textbf{\charpy} : énergie Charpy (J) à température d'essai connue --- l'astérisque rappelle que cette tâche est exploratoire.
+  \item \textbf{PWHT} : traitement thermique après soudage (\emph{post-weld heat treatment}), décrit par une température (°C) et une durée (h).
+  \item \textbf{Schémas d'entrées} : \og 11 \fg{}, \og 13 \fg{} et \og 16 \fg{} désignent le nombre de variables numériques utilisées (\cref{tab:schemas}).
+  \item \textbf{Validation aléatoire} : KFold sur les lignes ; \textbf{validation groupée} : GroupKFold sur les séries inférées (\cref{sec:protocole}).
+  \item Les scores sont, sauf mention contraire, des \textbf{moyennes non pondérées sur les cinq plis externes}, suivies de leur écart-type (SD) entre plis. Un SD n'est pas un intervalle de confiance.
+  \item Les nombres utilisent la virgule décimale ; les tableaux reprennent les valeurs des exports des notebooks, arrondies à trois décimales.
+\end{itemize}

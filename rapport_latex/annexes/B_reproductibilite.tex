@@ -1,0 +1,80 @@
+% =====================================================================
+%  Annexe B — Reproductibilité
+% =====================================================================
+\section{Reproductibilité}
+\label{annexe:reproductibilite}
+
+\subsection{Environnement}
+
+Les expériences ont été exécutées avec Python 3.14.8, scikit-learn 1.9.1,
+XGBoost 3.4.1, NumPy 2.5.3, pandas 3.0.6, joblib 1.6.0 et cloudpickle 3.1.2 ; les versions
+exactes sont enregistrées dans chaque manifeste d'expérience. Le fichier brut
+\fichier{welddb.data} a pour empreinte SHA-256 :
+
+\begin{center}
+\footnotesize\texttt{eb46df81a454c8e549187d87c67a6e72b88676f760e8688a782c832737676ac1}
+\end{center}
+
+\subsection{Commandes}
+
+Depuis la racine du dépôt :
+\begin{verbatim}
+python -m venv .venv && source .venv/bin/activate
+python -m pip install -r requirements.txt
+python scripts/download_data.py           # archive vérifiée par SHA-256
+python -m jupyterlab                      # exécuter 01 -> 09 de haut en bas
+python -m unittest discover -s tests -v   # 47 tests ciblés hors ligne
+python rapport_latex/scripts/generer_figures.py
+cd rapport_latex && latexmk -pdf main.tex
+\end{verbatim}
+
+\subsection{Notebooks, durées et exports}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Notebooks, durée de calcul rapportée dans les rapports d'exécution et exports produits (ignorés par Git).}
+\label{tab:notebooks}
+\begin{tabularx}{\textwidth}{@{}l L l@{}}
+\toprule
+Notebook & Rôle et exports & Durée \\
+\midrule
+01\_eda & Statuts, distributions, ACP descriptive ; aucun export d'entraînement & non mesurée \\
+02\_data\_preparation & Table maître, provenance, alias, groupes, plis, cellules en quarantaine, manifeste (\fichier{data/processed/modeling/}) & non mesurée \\
+03\_modeling & Benchmark 13/itérative groupé : 100 évaluations, 2\,440 ajustements (\fichier{salh\_supervised\_v1/}) & $\approx 6$\,min \\
+04\_diagnostics & Erreurs par série, sensibilités 11/13/16, permutations, audit Charpy (\fichier{salh\_diagnostics\_v1/}) & non mesurée \\
+05\_random\_kfold & CV aléatoire 16/médiane, 40 pipelines (\fichier{salh\_random\_kfold\_v1/}) & $\approx 7$\,min \\
+06\_grouped\_exports & CV groupée 16/médiane, 40 pipelines (\fichier{salh\_group\_kfold\_v1/}) & $\approx 2$\,min \\
+07\_coreg & COREG, contrôles, 108 pipelines (\fichier{salh\_coreg\_v1/}) & $\approx 10$\,min \\
+08\_xgboost & XGBoost, sélection à six familles, refits, 88 pipelines (\fichier{salh\_xgboost\_v1/}) & non mesurée \\
+09\_validation & Seuils ISO 2560-A E~42~2, $k = 2$, décisions et accords (\fichier{salh\_validation\_v1/}) & $< 1$\,min \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Les modèles sont sérialisés sous \fichier{models/} avec un fichier JSON compagnon
+(entrées, unités, identifiants du train, paramètres, graines, versions, SHA-256) :
+40 pipelines pour la CV aléatoire, 40 pour la CV groupée, 108 pour COREG et 88
+pour XGBoost et la sélection à six familles, soit \textbf{276 pipelines}. Chaque dossier possède un index \fichier{selected\_models.json}.
+Les modèles réentraînés sur tous les labels servent à l'inférence uniquement.
+
+\subsection{Contrôles automatiques}
+
+La suite de 47 tests hors ligne vérifie notamment : l'intégrité des archives,
+la classification des statuts de mesure, les doublons et les groupes, l'apprentissage
+des statistiques dans le seul train, la préservation des valeurs observées, les
+erreurs explicites (PWHT, non-convergence), l'étanchéité des recherches imbriquées,
+l'échelle des cibles de la SVR, les frontières des pools inductifs, et, pour COREG,
+l'égalité du gain local calculé avec un réapprentissage explicite, pour XGBoost
+le choix de famille sur la seule MAE interne, et pour la validation les bandes de
+garde, la règle Charpy, l'agrégation et l'absence de fuite dans le choix des plis. Des audits
+indépendants recalculent les métriques à partir des prédictions exportées et
+rechargent tous les modèles dans un processus Python neuf.
+
+\subsection{Figures de ce rapport}
+
+Les figures du dossier \ident{rapport_latex/figures/} sont produites par le script
+\ident{rapport_latex/scripts/generer_figures.py}, qui relit le fichier brut et
+les exports des notebooks sans réentraîner aucun modèle. Le script affiche les
+valeurs clés recalculées (effectifs, variance expliquée par l'ACP) afin de vérifier
+leur cohérence avec le texte.

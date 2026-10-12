@@ -2,7 +2,7 @@
 
 - Treat `sujet.md` as the original assignment; preserve its content.
 - Keep scientific choices and their justifications in `specs/spec.md`.
-- Put reusable code in `src/weld_quality/`; keep notebooks focused on exploration and interpretation.
+- Keep analysis, preparation and modeling code directly in the separate notebooks under `notebooks/`, as requested by the user. Do not recreate a package under `src/`. The standalone data downloader remains in `scripts/download_data.py`.
 - Preserve files in `data/raw/`. Write derived datasets to `data/processed/`.
 - Document variable units, missing-value encodings, target definitions, and preprocessing decisions.
 - Fit imputation, scaling, PCA, feature selection, and other learned transformations within training folds.

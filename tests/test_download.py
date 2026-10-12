@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from weld_quality import download
+from scripts import download_data as download
 
 
 def make_archive(entries: dict[str, bytes]) -> bytes:

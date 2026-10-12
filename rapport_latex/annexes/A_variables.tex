@@ -1,0 +1,75 @@
+% =====================================================================
+%  Annexe A — Dictionnaire des variables
+% =====================================================================
+\section{Dictionnaire des variables}
+\label{annexe:variables}
+
+Positions et unités d'après la documentation de la base~\cite{cool_welddb} ; noms
+utilisés dans les notebooks. Colonne \og Usage \fg{} : E11/E13/E16 = entrée des
+schémas 11, 13 ou 16 (\cref{tab:schemas}) ; C = cible ; X = non utilisée.
+
+{\footnotesize
+\begin{longtable}{@{}r l >{\raggedright\arraybackslash}p{4.7cm} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.4cm}@{}}
+\caption{Les 44 champs de la Cambridge Weld Database.}\label{tab:dictionnaire}\\
+\toprule
+Pos. & Nom (notebooks) & Signification & Unité & Usage \\
+\midrule
+\endfirsthead
+\toprule
+Pos. & Nom (notebooks) & Signification & Unité & Usage \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+1  & \texttt{C}  & Carbone   & \% massique & E11 \\
+2  & \texttt{Si} & Silicium  & \% massique & E11 \\
+3  & \texttt{Mn} & Manganèse & \% massique & E11 \\
+4  & \texttt{S}  & Soufre    & \% massique & E11 \\
+5  & \texttt{P}  & Phosphore & \% massique & E11 \\
+6  & \texttt{Ni} & Nickel    & \% massique & E16 \\
+7  & \texttt{Cr} & Chrome    & \% massique & E16 \\
+8  & \texttt{Mo} & Molybdène & \% massique & E16 \\
+9  & \texttt{V}  & Vanadium  & \% massique & X \\
+10 & \texttt{Cu} & Cuivre    & \% massique & X \\
+11 & \texttt{Co} & Cobalt    & \% massique & X \\
+12 & \texttt{W}  & Tungstène & \% massique & X \\
+13 & \texttt{O\_ppm}  & Oxygène   & ppm & E13 \\
+14 & \texttt{Ti\_ppm} & Titane    & ppm (unité à revoir) & X \\
+15 & \texttt{N\_ppm}  & Azote     & ppm & E13 \\
+16 & \texttt{Al\_ppm} & Aluminium & ppm (unité à revoir) & X \\
+17 & \texttt{B\_ppm}  & Bore      & ppm & X \\
+18 & \texttt{Nb\_ppm} & Niobium   & ppm & X \\
+19 & \texttt{Sn\_ppm} & Étain     & ppm (unité à revoir) & X \\
+20 & \texttt{As\_ppm} & Arsenic   & ppm (unité à revoir) & X \\
+21 & \texttt{Sb\_ppm} & Antimoine & ppm (unité à revoir) & X \\
+22 & \texttt{current\_A} & Courant de soudage & A & E11 \\
+23 & \texttt{voltage\_V} & Tension            & V & E11 \\
+24 & \texttt{ac\_dc}     & Type de courant (AC/DC) & catégoriel & X \\
+25 & \texttt{polarity}  & Polarité de l'électrode & catégoriel & X \\
+26 & \texttt{heat\_input\_kJmm} & Apport thermique & kJ/mm & E11 \\
+27 & \texttt{interpass\_C} & Température entre passes & °C & E11 \\
+28 & \texttt{weld\_type} & Procédé de soudage & catégoriel & tous schémas \\
+29 & \texttt{pwht\_temp\_C} & Température du traitement après soudage & °C & E11 \\
+30 & \texttt{pwht\_time\_h} & Durée du traitement après soudage & h & E11 \\
+31 & \texttt{yield\_strength} & Limite d'élasticité & MPa & C \\
+32 & \texttt{uts} & Résistance maximale à la traction & MPa & C \\
+33 & \texttt{elongation} & Allongement & \% & C \\
+34 & \texttt{reduction\_area} & Réduction de section & \% & X (complémentaire) \\
+35 & \texttt{charpy\_temp\_C} & Température d'essai Charpy & °C & entrée Charpy \\
+36 & \texttt{charpy\_J} & Énergie Charpy & J & C (exploratoire) \\
+37 & \texttt{hardness} & Dureté (protocole Vickers séparé) & kg/mm$^2$ & X \\
+38 & \texttt{fatt50} & Température de transition à 50\,\% de rupture ductile & non documentée & X \\
+39 & \texttt{prim\_ferrite} & Ferrite primaire & \% & X \\
+40 & \texttt{ferrite\_2nd\_phase} & Ferrite à seconde phase & \% & X \\
+41 & \texttt{acicular\_ferrite} & Ferrite aciculaire & \% & X \\
+42 & \texttt{martensite} & Martensite & \% & X \\
+43 & \texttt{ferrite\_carbide} & Agrégat ferrite-carbure & \% & X \\
+44 & \texttt{weld\_id} & Identifiant de la soudure et de sa source & texte & X (sert aux groupes) \\
+\end{longtable}
+}
+
+Dans la table maître, le procédé est stocké en \texttt{weld\_type\_raw} (brut)
+et \texttt{weld\_process} (synonymes regroupés) ; la dureté en
+\texttt{hardness\_value} et \texttt{hardness\_protocol}. Les colonnes
+\texttt{n\_unavail\_A1\_13}, \texttt{in\_strict13} et \texttt{has\_<cible>}
+définissent la cohorte et l'éligibilité de chaque cible.

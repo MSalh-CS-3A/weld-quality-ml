@@ -1,0 +1,218 @@
+% =====================================================================
+%  6. Protocole d'évaluation
+% =====================================================================
+\clearpage
+\section{Protocole de validation et métriques}
+\label{sec:protocole}
+
+\subsection{Pourquoi une validation croisée imbriquée ?}
+
+Un modèle doit être jugé sur des données qu'il n'a pas vues ; c'est le rôle de la
+validation croisée~\cite{sklearn_cv}. Mais lorsqu'on \emph{choisit} aussi des
+hyperparamètres, voire une famille de modèles, en regardant des scores de
+validation, ces scores deviennent optimistes : on a sélectionné le meilleur
+résultat parmi beaucoup d'essais~\cite{varma_simon_2006,cawley_talbot_2010}.
+
+La validation croisée \textbf{imbriquée} sépare les deux rôles :
+\begin{itemize}
+  \item une \textbf{boucle interne} (3 plis) choisit les hyperparamètres --- et, pour la \og sélection interne \fg{}, la famille --- en n'utilisant que le train externe ;
+  \item une \textbf{boucle externe} (5 plis) évalue \emph{une seule fois} la configuration choisie sur des données jamais utilisées pour la choisir.
+\end{itemize}
+Le score externe estime donc la performance de \emph{toute la procédure} de
+réglage, et non celle d'une configuration choisie après coup.
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[x=1cm,y=1cm,
+  tr/.style={draw=white, line width=0.8pt, fill=bleuviz!75},
+  va/.style={draw=white, line width=0.8pt, fill=orangeviz!90},
+  itr/.style={draw=white, line width=0.6pt, fill=bleuviz!40},
+  iva/.style={draw=white, line width=0.6pt, fill=vertviz!80},
+  lab/.style={font=\scriptsize, color=encre2, anchor=east}]
+  % Boucle externe
+  \foreach \k in {1,...,5} {
+    \pgfmathsetmacro{\y}{-0.5*(\k-1)}
+    \node[lab] at (-0.1,\y+0.2) {Pli externe \k};
+    \foreach \j in {1,...,5} {
+      \pgfmathsetmacro{\x}{1.6*(\j-1)}
+      \ifnum\j=\k
+        \fill[va] (\x,\y) rectangle ++(1.6,0.4);
+      \else
+        \fill[tr] (\x,\y) rectangle ++(1.6,0.4);
+      \fi
+    }
+  }
+  % Zoom sur le train externe du pli 1
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}, color=csgris, line width=0.7pt]
+    (1.6,-2.15) -- (8.0,-2.15) node[midway, below=6pt, font=\scriptsize, color=encre2]
+    {train externe du pli 1, redécoupé en 3 plis internes};
+  \foreach \k in {1,...,3} {
+    \pgfmathsetmacro{\y}{-3.2-0.42*(\k-1)}
+    \node[lab] at (1.5,\y+0.17) {interne \k};
+    \foreach \j in {1,...,3} {
+      \pgfmathsetmacro{\x}{1.6+2.1333*(\j-1)}
+      \ifnum\j=\k
+        \fill[iva] (\x,\y) rectangle ++(2.1333,0.34);
+      \else
+        \fill[itr] (\x,\y) rectangle ++(2.1333,0.34);
+      \fi
+    }
+  }
+  % Légende et étapes
+  \node[font=\scriptsize, align=left, anchor=north west, text width=4.3cm] at (8.4,0.4) {
+    \tikz\fill[bleuviz!75] (0,0) rectangle (0.3,0.2); \ train externe\\[2pt]
+    \tikz\fill[orangeviz!90] (0,0) rectangle (0.3,0.2); \ validation externe (évaluation)\\[2pt]
+    \tikz\fill[bleuviz!40] (0,0) rectangle (0.3,0.2); \ train interne\\[2pt]
+    \tikz\fill[vertviz!80] (0,0) rectangle (0.3,0.2); \ validation interne (réglage)};
+  \node[font=\scriptsize, align=left, anchor=north west, text width=4.3cm] at (8.4,-2.0) {
+    \textbf{Pour chaque pli externe :}\\
+    1. 39 (puis 51) configurations $\times$ 3 plis internes ;\\
+    2. choix par MAE interne moyenne ;\\
+    3. réapprentissage sur tout le train externe ;\\
+    4. prédiction unique de la validation externe.};
+\end{tikzpicture}
+\caption{Validation croisée imbriquée : 5 plis externes pour l'évaluation, 3 plis
+internes dans chaque train externe pour le réglage. Le prétraitement est réappris
+à chaque ajustement (interne et externe).}
+\label{fig:cv_imbriquee}
+\end{figure}
+
+Pour chaque cible et chaque pli externe, cela représente 39 configurations
+$\times$ 3 validations internes, plus un réapprentissage par famille : dans le
+benchmark du notebook 03, \textbf{2\,340 ajustements internes et 100 réapprentissages
+externes}, soit 2\,440 ajustements d'estimateurs. L'ajout de XGBoost (notebook 08)
+représente 12 configurations $\times$ 3 validations internes $\times$ 5 plis
+$\times$ 4 cibles $\times$ 2 protocoles, plus 40 réapprentissages externes et
+les réglages des modèles complets, soit 1\,968 ajustements. Tout échec d'ajustement
+lève une erreur (\texttt{error\_score='raise'}) plutôt que d'être masqué.
+
+\subsection{Deux scénarios de validation, deux questions}
+\label{subsec:deux_scenarios}
+
+La manière de former les plis détermine la question à laquelle répond le score.
+Nous utilisons deux scénarios, avec les mêmes labels et les mêmes familles
+(\cref{tab:scenarios}).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Les deux scénarios de validation croisée.}
+\label{tab:scenarios}
+\begin{tabularx}{\textwidth}{@{}>{\raggedright\arraybackslash}p{2.9cm} L L@{}}
+\toprule
+ & \textbf{Validation aléatoire} & \textbf{Validation groupée} \\
+\midrule
+Découpage externe & KFold(5) mélangé, graine 42, par cible & GroupKFold(5) sur les séries inférées, sans mélange \\
+Découpage interne & KFold(3) mélangé, graine $43 + \text{pli}$ & GroupKFold(3) dans chaque train externe \\
+Ce qui est séparé & Des lignes & Des séries entières \\
+Question posée & Prédire une nouvelle soudure d'une série \emph{déjà représentée} & Prédire les soudures d'une \emph{nouvelle étude} \\
+Partage observé & 99 à 100\,\% des lignes de validation ont une série présente dans le train & Aucune série partagée \\
+Risque & Optimisme si l'usage visé concerne de nouvelles séries & Pessimisme si les séries sont très hétérogènes ou mal définies \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{intuition}
+Imaginons une étude qui fait varier la teneur en nickel de cinq soudures
+fabriquées avec le même procédé, dans le même laboratoire. En validation
+aléatoire, quatre d'entre elles peuvent être dans le train : le modèle
+\og connaît \fg{} déjà le niveau de cette étude et n'a qu'à interpoler. En
+validation groupée, les cinq sont absentes : le modèle doit deviner le niveau
+d'une étude qu'il n'a jamais vue. Les données structurées en groupes appellent
+une validation qui respecte cette structure~\cite{roberts_2017}.
+\end{intuition}
+
+En validation groupée, chaque pli externe contient 8 à 10 groupes ; les
+validations des trois cibles de traction comportent 103 à 166 labels selon le
+pli. Le nombre de lignes ne garantit pas le nombre d'observations réellement
+indépendantes.
+
+\begin{decision}
+Les deux scénarios sont conservés et rapportés côte à côte. Le choix du
+protocole \og principal \fg{} dépend de l'usage : la validation aléatoire décrit
+l'interpolation dans la population couverte par la base, la validation groupée
+est un test de transfert à de nouvelles études. On ne choisit pas le protocole
+qui affiche le meilleur score.
+\end{decision}
+
+\subsection{Métriques}
+\label{subsec:metriques}
+
+Pour $n$ labels de validation $y_i$, de prédictions $\hat{y}_i$ et de moyenne $\bar{y}$ :
+\begin{align}
+  \mathrm{MAE}  &= \frac{1}{n}\sum_{i=1}^{n} |y_i - \hat{y}_i|, \\
+  \mathrm{RMSE} &= \sqrt{\frac{1}{n}\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}, \\
+  R^2 &= 1 - \frac{\sum_{i=1}^{n} (y_i - \hat{y}_i)^2}{\sum_{i=1}^{n} (y_i - \bar{y})^2}.
+\end{align}
+
+\begin{itemize}
+  \item La \textbf{MAE} est l'erreur typique, dans l'unité de la cible (MPa, points de \%, J). Elle sert de \textbf{critère de réglage}.
+  \item La \textbf{RMSE} pénalise davantage les grandes erreurs ; l'écart entre RMSE et MAE renseigne sur la présence d'erreurs très fortes.
+  \item Le \textbf{$R^2$} est sans unité : c'est la part de la variance de la validation expliquée par le modèle. $R^2 = 0$ correspond à prédire la moyenne \emph{de la validation} ; $R^2 < 0$ signifie faire pire. Il permet de comparer des cibles d'unités différentes, mais dépend de la variance de la population évaluée.
+\end{itemize}
+
+Deux agrégations coexistent. La \textbf{moyenne des plis} calcule la métrique dans
+chaque pli externe puis en fait la moyenne non pondérée (avec l'écart-type SD) ;
+le score \textbf{OOF} (\emph{out-of-fold}) réunit toutes les prédictions externes
+puis calcule une seule métrique. Les deux diffèrent, surtout pour le $R^2$, car
+chaque pli a sa propre variance. Sauf mention contraire, les tableaux donnent la
+moyenne des plis. Pour comparer deux méthodes sur les mêmes observations, nous
+utilisons un \textbf{gain apparié} de MAE OOF accompagné d'un intervalle
+\textbf{bootstrap par groupes} (2\,000 rééchantillonnages des séries)~\cite{efron_tibshirani_1993},
+plus honnête qu'un bootstrap par lignes lorsque les lignes d'une série sont dépendantes.
+
+\begin{precaution}
+Les écarts-types entre plis et les intervalles bootstrap sont descriptifs : ils
+sont conditionnels aux plis et aux modèles entraînés, et ne constituent pas des
+intervalles de confiance sur de nouvelles publications. Un $R^2$ de 0,5 n'est
+pas un seuil garanti par le choix d'un algorithme.
+\end{precaution}
+
+\subsection{Protocole inductif pour le semi-supervisé}
+\label{subsec:inductif}
+
+Un protocole semi-supervisé est \emph{transductif} s'il exploite les entrées de
+validation (sans leurs labels) pendant l'apprentissage, et \emph{inductif} s'il
+ne les voit jamais. Nous adoptons un protocole \textbf{strictement inductif} :
+\begin{itemize}
+  \item le pool non étiqueté d'un pli ne contient que des lignes sans la cible \emph{affectées au train courant} --- interne comme externe ;
+  \item en validation aléatoire, les lignes sans label sont réparties en cinq blocs équilibrés (graine 142), puis en trois blocs internes (graine $1042 + \text{pli}$) ; aucune ligne de validation n'entre dans le pool ;
+  \item en validation groupée, le pool exclut en plus \emph{toutes les séries} de validation ;
+  \item ni les entrées ni les labels de validation ne servent au calcul de confiance, à l'arrêt ou au prétraitement ;
+  \item les modèles réentraînés sur tous les labels ne servent jamais à scorer les plis.
+\end{itemize}
+
+\subsection{Graines et reproductibilité}
+
+Toutes les sources d'aléa sont fixées et enregistrées dans les manifestes
+d'expérience (\cref{tab:graines}). Les partitions sont exportées par identifiant
+brut ; les versions des bibliothèques et les empreintes SHA-256 des données, du
+code et des exports sont consignées (\cref{annexe:reproductibilite}).
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Graines aléatoires utilisées.}
+\label{tab:graines}
+\begin{tabularx}{\textwidth}{@{}l L@{}}
+\toprule
+Graine & Usage \\
+\midrule
+42 & Estimateurs stochastiques (forêts), imputation itérative, plis externes aléatoires, base des graines de COREG, bootstrap des gains COREG (2\,000 tirages), test de permutation série/cible (999) \\
+$43 + \text{pli}$ & Plis internes de la validation aléatoire \\
+142 & Répartition des lignes sans label en cinq blocs (validation aléatoire) \\
+$1042 + \text{pli}$ & Blocs internes des lignes sans label \\
+1042 & CV5 aléatoire de sélection des modèles réentraînés sur tous les labels \\
+1142 & Affectation des lignes sans label lors des réapprentissages complets de COREG \\
+43, 44 & Sensibilité de COREG à la graine (à $k$ fixé) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{aretenir}
+Validation croisée \textbf{imbriquée} 5$\times$3, prétraitement réappris dans
+chaque train, sélection par MAE interne. Deux scénarios complémentaires :
+\textbf{aléatoire} (interpolation dans des séries connues) et \textbf{groupé}
+(transfert à de nouvelles séries). Métriques MAE, RMSE, $R^2$ ; semi-supervisé
+évalué selon un protocole \textbf{inductif}.
+\end{aretenir}
