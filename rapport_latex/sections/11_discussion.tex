@@ -25,7 +25,9 @@ Forêt aléatoire, premier benchmark & 13 / itérative & -- & 0,079 \\
 Forêt aléatoire & 13 / médiane & -- & 0,102 \\
 Forêt aléatoire & 16 / médiane & 0,765 & 0,390 \\
 Sélection conjointe interne (schéma, imputation, famille) & 11--16 / les deux & -- & 0,337 \\
-\textbf{Sélection interne de la famille (référence)} & \textbf{16 / médiane} & \textbf{0,755} & \textbf{0,337} \\
+XGBoost & 16 / médiane & 0,816 & 0,367 \\
+Sélection interne parmi cinq familles & 16 / médiane & 0,755 & 0,337 \\
+\textbf{Sélection interne parmi six familles (référence)} & \textbf{16 / médiane} & \textbf{0,816} & \textbf{0,367} \\
 $k$NN réglé & 16 / médiane & 0,619 & $-0{,}140$ \\
 COREG (semi-supervisé) & 16 / médiane & 0,629 & $-0{,}056$ \\
 \bottomrule
@@ -34,7 +36,7 @@ COREG (semi-supervisé) & 16 / médiane & 0,629 & $-0{,}056$ \\
 
 Trois enseignements en découlent :
 \begin{enumerate}
-  \item \textbf{Les entrées comptent davantage que l'algorithme.} Passer de 13 à 16 entrées fait passer le $R^2$ groupé de la forêt de 0,10 à 0,39, alors que changer de famille à entrées fixées modifie beaucoup moins le score.
+  \item \textbf{Les entrées comptent davantage que l'algorithme.} Passer de 13 à 16 entrées fait passer le $R^2$ groupé de la forêt de 0,10 à 0,39, alors que changer de famille à entrées fixées modifie beaucoup moins le score : ajouter XGBoost à la sélection gagne 0,06 de $R^2$ pour \YS{} en aléatoire et 0,03 en groupé.
   \item \textbf{Le protocole change la conclusion.} Toutes les familles apprises perdent entre 0,3 et 0,8 point de $R^2$ entre validation aléatoire et groupée ; les méthodes locales ($k$NN, COREG) deviennent même pires que la constante.
   \item \textbf{Le semi-supervisé n'aide pas ici.} Exploiter les entrées sans label n'apporte pas l'information qui manque pour transférer entre séries.
 \end{enumerate}
@@ -43,18 +45,21 @@ Trois enseignements en découlent :
 
 \begin{decision}
 L'approche recommandée est la \textbf{procédure supervisée 16 entrées + procédé,
-imputation médiane apprise dans le train, avec choix de la famille et des
-hyperparamètres par validation interne}. En pratique, cette procédure retient
-une \textbf{SVR RBF} ou une \textbf{forêt aléatoire} selon la cible
-(\cref{tab:modeles_finaux}) ; la forêt est la plus robuste lorsque la série est
-inconnue. COREG est conservé comme expérience semi-supervisée documentée, pas
-comme modèle de référence.
+imputation médiane apprise dans le train, avec choix de la famille parmi six et
+des hyperparamètres par validation interne}. En pratique, cette procédure retient
+surtout \textbf{XGBoost}, et ponctuellement une SVR RBF ou une forêt aléatoire
+selon la cible et le protocole (\cref{tab:modeles_finaux}) ; la forêt reste la
+famille la plus robuste lorsque la série est inconnue. COREG est conservé comme
+expérience semi-supervisée documentée, pas comme modèle de référence. Pour une
+décision de conformité, les prédictions passent par la règle de la
+\cref{sec:validation}.
 \end{decision}
 
 Le niveau de confiance à accorder dépend toutefois de l'usage :
 \begin{itemize}
-  \item \textbf{Soudure proche d'une série déjà documentée} (même procédé, mêmes familles de composition) : l'erreur typique attendue est d'environ 30\,MPa sur \YS, 25\,MPa sur \UTS{} et 2 points d'allongement --- un ordre de grandeur utile pour pré-sélectionner des recettes avant essais.
-  \item \textbf{Soudure d'une nouvelle étude, procédé ou famille d'alliage} : l'erreur double (environ 55\,MPa sur \YS{} et \UTS) et le $R^2$ chute sous 0,35. Le modèle ne remplace pas l'essai mécanique ; il peut au mieux orienter.
+  \item \textbf{Soudure proche d'une série déjà documentée} (même procédé, mêmes familles de composition) : l'erreur typique attendue est d'environ 26\,MPa sur \YS, 24\,MPa sur \UTS{} et 2 points d'allongement --- un ordre de grandeur utile pour pré-sélectionner des recettes avant essais.
+  \item \textbf{Soudure d'une nouvelle étude, procédé ou famille d'alliage} : l'erreur double (environ 55\,MPa sur \YS{} et \UTS) et le $R^2$ chute sous 0,37. Le modèle ne remplace pas l'essai mécanique ; il peut au mieux orienter.
+  \item \textbf{Décision de conformité} : avec la classe ISO 2560-A E~42~2 et une bande de garde de deux erreurs types, le modèle ne valide aucune soudure et ne tranche que 7 à 27\,\% des critères pour une série nouvelle (\cref{sec:validation}).
   \item \textbf{Énergie Charpy} : les prédictions restent exploratoires tant que les protocoles ne sont pas harmonisés ; elles ne doivent pas servir à une décision de ténacité.
 \end{itemize}
 
@@ -65,7 +70,8 @@ Le niveau de confiance à accorder dépend toutefois de l'usage :
   \item \textbf{Groupes imparfaits.} Les séries sont inférées des identifiants : elles peuvent fusionner ou séparer des publications. Elles restent des approximations des vraies unités d'indépendance.
   \item \textbf{Données hétérogènes.} Compositions incomplètes, unités douteuses en quarantaine, protocoles Charpy non harmonisés, précision de transcription inconnue.
   \item \textbf{Entrées omises.} Des éléments exclus pour leur faible couverture (Nb, V, Ti, B, Cu\ldots) peuvent expliquer une partie des décalages entre séries.
-  \item \textbf{Incertitude.} Les intervalles rapportés sont descriptifs ; aucune prédiction n'est accompagnée d'un intervalle de prédiction calibré.
+  \item \textbf{Incertitude.} Les intervalles rapportés sont descriptifs ; la règle de validation utilise une erreur globale par cible, pas un intervalle de prédiction calibré pour chaque soudure.
+  \item \textbf{Seuils.} Les seuils viennent de normes de classification du métal fondu ; ils ne décrivent ni un joint complet ni toutes les applications, et les valeurs individuelles d'éprouvettes Charpy ne sont pas modélisées.
   \item \textbf{Semi-supervisé.} Une seule méthode, un seul budget de labels (complet) ; d'autres variantes (régresseurs différents, labels rares) restent à explorer.
 \end{itemize}
 
@@ -84,20 +90,22 @@ essais dédiés.
   \item \textbf{Enregistrer les protocoles d'essai}, en particulier pour Charpy : distinguer une énergie mesurée à température imposée d'une température de transition, et conserver des courbes $E(T)$ complètes.
   \item \textbf{Identifier les séries, éprouvettes et publications} dans les bases, afin de pouvoir valider honnêtement le transfert à de nouvelles études.
   \item \textbf{Valider tout modèle sur de nouvelles séries} avec de vraies mesures avant un usage opérationnel, et signaler les soudures hors du domaine du train (procédé inconnu, compositions extrêmes), où l'erreur augmente nettement.
+  \item \textbf{Utiliser le modèle comme filtre de conformité}, pas comme verdict : une soudure PARTIELLE vis-à-vis d'une classe normative (par exemple ISO 2560-A E~42~2) doit être confirmée par des essais de traction et de résilience.
   \item \textbf{Privilégier la diversité des études} plutôt que le nombre de lignes : les courbes d'apprentissage suggèrent que de nouvelles séries sont plus informatives que de nouvelles répétitions.
 \end{enumerate}
 
 \paragraph{Ce que l'étude ne permet pas d'affirmer.} Aucun réglage de soudage
-\og optimal \fg{}, aucun seuil universel de bonne soudure et aucun effet causal
-d'un élément ou d'un paramètre n'est démontré. Les importances indiquent
+\og optimal \fg{} et aucun effet causal d'un élément ou d'un paramètre n'est
+démontré. Les seuils utilisés sont des exigences normatives choisies pour une
+application, pas un critère universel de bonne soudure. Les importances indiquent
 \emph{quelles} informations le modèle utilise, pas \emph{dans quel sens} modifier
 une recette. Pour formuler des recommandations de procédé (composition cible,
 apport thermique, PWHT), il faudrait des plans d'expériences contrôlés et
 l'expertise de métallurgistes du soudage.
 
 \begin{aretenir}
-La procédure supervisée 16/médiane (SVR ou forêt aléatoire selon la cible) est
-l'approche la plus appropriée. Elle est fiable pour interpoler dans des séries
+La procédure supervisée 16/médiane avec sélection parmi six familles (surtout
+XGBoost) est l'approche la plus appropriée. Elle est fiable pour interpoler dans des séries
 connues, nettement moins pour de nouvelles études. Les leviers d'amélioration
 sont avant tout la \textbf{qualité et la complétude des données} : composition
 complète, PWHT, protocoles d'essai et identification des séries.

@@ -8,7 +8,9 @@
 Cette section présente les résultats dans l'ordre où ils ont été obtenus : un
 premier benchmark groupé avec la configuration initiale (13 entrées, imputation
 itérative), puis les résultats de la configuration de travail (16 entrées,
-imputation médiane) sous les deux scénarios de validation.
+imputation médiane) sous les deux scénarios de validation, d'abord avec cinq
+familles, puis avec XGBoost en sixième famille (notebook 08), qui constitue la
+référence actuelle.
 
 \subsection{Premier benchmark : 13 entrées, imputation itérative, validation groupée}
 \label{subsec:bench13}
@@ -74,23 +76,27 @@ modifié la configuration : ajouter Ni, Cr et Mo et passer à l'imputation médi
 Avec 16 entrées numériques, le procédé et une imputation médiane, chaque
 scénario est évalué par validation imbriquée où \textbf{la famille et ses
 hyperparamètres sont choisis dans la boucle interne} (\og sélection interne \fg{}).
-La \cref{fig:synthese} et le \cref{tab:synthese} présentent le résultat
-principal du projet.
+Les notebooks 05 et 06 ont d'abord comparé cinq familles ; le notebook 08 a
+ajouté XGBoost et refait la sélection interne entre les \textbf{six familles},
+sur les mêmes labels et les mêmes plis. Cette procédure à six familles est la
+référence du rapport. La \cref{fig:synthese} et le \cref{tab:synthese}
+présentent le résultat principal du projet.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\textwidth]{res_synthese_r2}
 \caption{Résultat principal : $R^2$ moyen ($\pm$ écart-type sur 5 plis) de la
-procédure supervisée avec sélection interne de la famille, configuration
-16/médiane. Bleu : validation aléatoire ; orange : validation groupée.}
+procédure supervisée avec sélection interne de la famille parmi six,
+configuration 16/médiane. Bleu : validation aléatoire ; orange : validation groupée.}
 \label{fig:synthese}
 \end{figure}
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Procédure supervisée avec sélection interne, configuration 16/médiane :
-moyennes $\pm$ écart-type sur 5 plis externes, et MAE relative à la médiane de la cible.}
+\caption{Procédure supervisée avec sélection interne parmi six familles,
+configuration 16/médiane : moyennes $\pm$ écart-type sur 5 plis externes, et MAE
+relative à la médiane de la cible.}
 \label{tab:synthese}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -100,23 +106,51 @@ moyennes $\pm$ écart-type sur 5 plis externes, et MAE relative à la médiane d
 \cmidrule(lr){2-4}\cmidrule(lr){5-7}
 Cible & MAE & MAE rel. & $R^2$ & MAE & MAE rel. & $R^2$ \\
 \midrule
-\YS{} (MPa)               & 31,630 $\pm$ 4,114 & 6,4\,\%  & 0,755 $\pm$ 0,063 & 56,757 $\pm$ 12,398 & 11,4\,\% & 0,337 $\pm$ 0,161 \\
-\UTS{} (MPa)              & 23,861 $\pm$ 0,906 & 4,1\,\%  & 0,836 $\pm$ 0,027 & 54,344 $\pm$ 13,181 & 9,4\,\%  & 0,334 $\pm$ 0,228 \\
-Allongement (pts de \%)   & 2,054 $\pm$ 0,239  & 7,7\,\%  & 0,660 $\pm$ 0,058 & 3,517 $\pm$ 0,516   & 13,2\,\% & 0,157 $\pm$ 0,220 \\
-\charpy{} (J)             & 16,461 $\pm$ 1,161 & 16,5\,\% & 0,776 $\pm$ 0,062 & 35,752 $\pm$ 11,863 & 35,8\,\% & 0,075 $\pm$ 0,138 \\
+\YS{} (MPa)               & 26,334 $\pm$ 2,735 & 5,3\,\%  & 0,816 $\pm$ 0,043 & 54,363 $\pm$ 9,820  & 11,0\,\% & 0,367 $\pm$ 0,167 \\
+\UTS{} (MPa)              & 23,604 $\pm$ 0,765 & 4,1\,\%  & 0,830 $\pm$ 0,035 & 55,691 $\pm$ 12,936 & 9,7\,\%  & 0,307 $\pm$ 0,215 \\
+Allongement (pts de \%)   & 2,064 $\pm$ 0,225  & 7,8\,\%  & 0,646 $\pm$ 0,053 & 3,278 $\pm$ 0,374   & 12,3\,\% & 0,260 $\pm$ 0,138 \\
+\charpy{} (J)             & 14,151 $\pm$ 0,724 & 14,2\,\% & 0,845 $\pm$ 0,026 & 36,267 $\pm$ 12,771 & 36,3\,\% & 0,058 $\pm$ 0,119 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Lecture.} En validation aléatoire, l'erreur typique est de
-\textbf{32\,MPa sur \YS{} et 24\,MPa sur \UTS}, soit 4 à 6\,\% de la valeur
-médiane, et les $R^2$ dépassent 0,75 pour \YS, \UTS{} et Charpy. Par rapport à la
-référence médiane, la MAE baisse de 55\,\% (\YS), 65\,\% (\UTS), 49\,\%
-(allongement) et 55\,\% (Charpy). En validation groupée, les mêmes procédures
+\textbf{26\,MPa sur \YS{} et 24\,MPa sur \UTS}, soit 4 à 5\,\% de la valeur
+médiane, et les $R^2$ dépassent 0,8 pour \YS, \UTS{} et Charpy. Par rapport à la
+référence médiane, la MAE baisse de 62\,\% (\YS), 66\,\% (\UTS), 49\,\%
+(allongement) et 62\,\% (Charpy). En validation groupée, les mêmes procédures
 perdent une grande partie de leur pouvoir prédictif : la MAE ne baisse plus que
-de 19\,\% (\YS), 25\,\% (\UTS), 14\,\% (allongement) et 1\,\% (Charpy) par rapport à
-la référence. L'écart entre les deux scénarios est le résultat le plus
-important du projet ; la \cref{sec:diag} en analyse les causes.
+de 23\,\% (\YS{} et \UTS) et 20\,\% (allongement), et pour Charpy elle est même
+légèrement supérieure à celle de la référence ($+1$\,\%). L'écart entre les deux
+scénarios est le résultat le plus important du projet ; la \cref{sec:diag} en
+analyse les causes.
+
+\paragraph{Apport de XGBoost.} Le \cref{tab:cinq_six} compare la sélection
+interne avant et après l'ajout de XGBoost. La MAE baisse dans cinq comparaisons
+sur huit, nettement en validation aléatoire pour \YS{} ($-5{,}3$\,MPa) et Charpy
+($-2{,}3$\,J). Elle augmente légèrement dans trois cas, dont \UTS{} et Charpy en
+validation groupée : un choix par MAE interne n'est pas garanti d'améliorer le
+score externe, et ces écarts restent inférieurs aux écarts-types entre plis.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{MAE moyenne de la sélection interne avec cinq familles (notebooks 05/06)
+et six familles (notebook 08), mêmes labels et mêmes plis.}
+\label{tab:cinq_six}
+\begin{tabular}{@{}l rrr rrr@{}}
+\toprule
+ & \multicolumn{3}{c}{Validation aléatoire} & \multicolumn{3}{c}{Validation groupée} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Cible & 5 familles & 6 familles & Écart & 5 familles & 6 familles & Écart \\
+\midrule
+\YS{} (MPa)             & 31,630 & 26,334 & $-5{,}296$ & 56,757 & 54,363 & $-2{,}394$ \\
+\UTS{} (MPa)            & 23,861 & 23,604 & $-0{,}257$ & 54,344 & 55,691 & $+1{,}347$ \\
+Allongement (pts)       & 2,054  & 2,064  & $+0{,}010$ & 3,517  & 3,278  & $-0{,}239$ \\
+\charpy{} (J)           & 16,461 & 14,151 & $-2{,}310$ & 35,752 & 36,267 & $+0{,}515$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{Comparaison des familles de modèles}
 
@@ -129,7 +163,7 @@ séparément, avec ses hyperparamètres réglés en interne
 \includegraphics[width=\textwidth]{res_familles_r2}
 \caption{$R^2$ moyen ($\pm$ écart-type) de chaque famille, configuration 16/médiane,
 validations aléatoire et groupée. La dernière colonne (fond gris) est la procédure
-de sélection interne de la famille.}
+de sélection interne parmi les six familles.}
 \label{fig:familles}
 \end{figure}
 
@@ -149,16 +183,18 @@ Famille & A & G & A & G & A & G & A & G \\
 \multicolumn{9}{@{}l}{\emph{MAE}} \\
 Médiane de $y$  & 70,03 & 70,45 & 68,88 & 72,66 & 4,02 & 4,09 & 36,76 & 36,04 \\
 Ridge           & 54,05 & 69,39 & 44,32 & 61,90 & 3,01 & 3,66 & 26,91 & 34,75 \\
-SVR RBF         & 31,75 & 59,35 & \meilleur{23,86} & 52,86 & 2,27 & 3,67 & 17,39 & 35,96 \\
-Forêt aléatoire & \meilleur{31,24} & \meilleur{54,14} & 26,91 & \meilleur{48,91} & \meilleur{2,05} & \meilleur{3,34} & \meilleur{16,10} & \meilleur{33,03} \\
+SVR RBF         & 31,75 & 59,35 & 23,86 & 52,86 & 2,27 & 3,67 & 17,39 & 35,96 \\
+Forêt aléatoire & 31,24 & \meilleur{54,14} & 26,91 & \meilleur{48,91} & 2,05 & 3,34 & 16,10 & \meilleur{33,03} \\
 $k$NN           & 38,14 & 73,50 & 33,45 & 68,54 & 2,42 & 3,98 & 19,25 & 35,73 \\
+XGBoost         & \meilleur{26,33} & 54,36 & \meilleur{22,54} & 50,22 & \meilleur{2,02} & \meilleur{3,32} & \meilleur{14,15} & 35,45 \\
 \addlinespace
 \multicolumn{9}{@{}l}{\emph{$R^2$}} \\
 Médiane de $y$  & $-0{,}031$ & $-0{,}073$ & $-0{,}050$ & $-0{,}180$ & $-0{,}015$ & $-0{,}062$ & $-0{,}069$ & $-0{,}149$ \\
 Ridge           & 0,412 & $-0{,}025$ & 0,538 & 0,179 & 0,345 & 0,016 & 0,529 & 0,069 \\
-SVR RBF         & 0,754 & 0,264 & \meilleur{0,836} & 0,316 & 0,556 & 0,106 & 0,749 & 0,091 \\
-Forêt aléatoire & \meilleur{0,765} & \meilleur{0,390} & 0,805 & \meilleur{0,394} & \meilleur{0,660} & \meilleur{0,226} & \meilleur{0,795} & \meilleur{0,138} \\
+SVR RBF         & 0,754 & 0,264 & 0,836 & 0,316 & 0,556 & 0,106 & 0,749 & 0,091 \\
+Forêt aléatoire & 0,765 & \meilleur{0,390} & 0,805 & \meilleur{0,394} & \meilleur{0,660} & 0,226 & 0,795 & \meilleur{0,138} \\
 $k$NN           & 0,619 & $-0{,}140$ & 0,697 & $-0{,}115$ & 0,530 & $-0{,}060$ & 0,651 & $-0{,}099$ \\
+XGBoost         & \meilleur{0,816} & 0,367 & \meilleur{0,845} & 0,392 & 0,654 & \meilleur{0,238} & \meilleur{0,845} & 0,069 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -167,13 +203,14 @@ $k$NN           & 0,619 & $-0{,}140$ & 0,697 & $-0{,}115$ & 0,530 & $-0{,}060$ &
 \begin{itemize}
   \item \textbf{Référence médiane.} Son $R^2$ est légèrement négatif, comme attendu : prédire la médiane du train est un peu moins bon que prédire la moyenne de la validation. Elle fixe le plancher.
   \item \textbf{Ridge.} Elle capte une partie du signal en aléatoire ($R^2$ de 0,35 à 0,54), mais presque rien en groupé. Une relation \emph{linéaire} globale ne suffit pas à décrire les propriétés.
-  \item \textbf{SVR RBF et forêt aléatoire.} Ce sont les deux meilleures familles. La SVR est la meilleure pour \UTS{} en aléatoire ; la forêt est la meilleure partout ailleurs et la plus robuste en validation groupée. Les non-linéarités et interactions sont donc importantes.
+  \item \textbf{SVR RBF et forêt aléatoire.} Ce sont les meilleures familles du cours. La forêt est la plus robuste en validation groupée pour \YS, \UTS{} et Charpy. Les non-linéarités et interactions sont donc importantes.
+  \item \textbf{XGBoost.} C'est la meilleure famille en validation aléatoire pour les quatre cibles en MAE ($R^2$ de 0,82 à 0,85 pour \YS, \UTS{} et Charpy). En groupé, il est au niveau de la forêt (meilleur pour l'allongement, légèrement derrière ailleurs) : il exploite mieux les séries connues sans mieux transférer aux nouvelles.
   \item \textbf{$k$NN.} Très correct en aléatoire ($R^2$ de 0,53 à 0,70) mais \emph{négatif} en groupé. C'est un signal clair : une méthode purement locale prédit bien lorsqu'un voisin de la même série est présent dans le train, et échoue lorsque ce n'est plus le cas.
 \end{itemize}
 
 \begin{precaution}
 La forêt aléatoire isolée peut afficher un meilleur score externe que la
-procédure de sélection interne (par exemple 0,390 contre 0,337 pour \YS{} en
+procédure de sélection interne (par exemple 0,390 contre 0,367 pour \YS{} en
 groupé). Choisir la forêt \emph{après} avoir lu ce tableau reviendrait à
 sélectionner sur la validation : seul le score de la sélection interne est une
 estimation honnête de la procédure complète.
@@ -182,31 +219,32 @@ estimation honnête de la procédure complète.
 \subsection{Familles et hyperparamètres sélectionnés}
 
 La sélection interne peut choisir une famille différente selon le pli. Les
-\cref{tab:selection_aleatoire,tab:selection_groupee} détaillent ces choix.
+\cref{tab:selection_aleatoire,tab:selection_groupee} détaillent ces choix pour la
+procédure à six familles ($\eta$ : pas d'apprentissage ; prof. : profondeur ;
+\texttt{mf} : fraction de variables par coupure).
 
 \begin{table}[htbp]
 \centering
 \small
 \caption{Validation aléatoire : famille et hyperparamètres choisis par la MAE
-interne dans chaque pli externe, et scores externes obtenus.}
+interne dans chaque pli externe (six familles), et scores externes obtenus.}
 \label{tab:selection_aleatoire}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}l c l l r r@{}}
 \toprule
 Cible & Pli & Famille & Hyperparamètres & MAE & $R^2$ \\
 \midrule
-\YS     & 0 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma=0{,}05$ & 28,27 & 0,769 \\
-        & 1 & Forêt   & feuille 1, prof. libre, \texttt{mf} 0,5 & 29,26 & 0,817 \\
-        & 2 & Forêt   & feuille 1, prof. libre, \texttt{mf} 0,5 & 35,67 & 0,671 \\
-        & 3 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma$=scale & 28,42 & 0,807 \\
-        & 4 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma$=scale & 36,54 & 0,710 \\
+\YS     & 0, 1 & XGBoost & $\eta=0{,}1$, prof. 4, 300 arbres & 22,01 / 26,82 & 0,865 / 0,843 \\
+        & 2--4 & XGBoost & $\eta=0{,}1$, prof. 6, 300 arbres & 25,65--28,97 & 0,750--0,818 \\
 \midrule
-\UTS    & 0--4 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma \in \{0{,}05;\text{scale}\}$ & 23,1--25,4 & 0,814--0,871 \\
+\UTS    & 0, 3, 4 & XGBoost & $\eta=0{,}1$, prof. 6, 300 arbres & 22,62--24,70 & 0,777--0,864 \\
+        & 1, 2 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma \in \{\text{scale};0{,}05\}$ & 23,84 / 23,59 & 0,819 / 0,859 \\
 \midrule
-Allong. & 0--4 & Forêt & feuille 1, prof. libre, \texttt{mf} $\in\{0{,}5; 1\}$ & 1,84--2,42 & 0,569--0,728 \\
+Allong. & 0 & XGBoost & $\eta=0{,}1$, prof. 6, 300 arbres & 1,92 & 0,632 \\
+        & 1--3 & XGBoost & $\eta=0{,}03$, prof. 6, 300 arbres & 1,87--2,15 & 0,647--0,713 \\
+        & 4 & Forêt & feuille 1, prof. libre, \texttt{mf} 1 & 2,42 & 0,569 \\
 \midrule
-Charpy  & 0, 1, 3, 4 & Forêt & feuille 1, prof. libre, \texttt{mf} $\in\{0{,}5; 1\}$ & 14,9--17,5 & 0,756--0,849 \\
-        & 2 & SVR RBF & $C=100$, $\varepsilon=0{,}05$, $\gamma=0{,}05$ & 17,51 & 0,683 \\
+Charpy  & 0--4 & XGBoost & $\eta=0{,}1$, prof. 6, 300 arbres & 13,71--15,43 & 0,820--0,876 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -215,44 +253,43 @@ Charpy  & 0, 1, 3, 4 & Forêt & feuille 1, prof. libre, \texttt{mf} $\in\{0{,}5;
 \centering
 \small
 \caption{Validation groupée : famille et hyperparamètres choisis par la MAE
-interne dans chaque pli externe, et scores externes obtenus.}
+interne dans chaque pli externe (six familles), et scores externes obtenus.}
 \label{tab:selection_groupee}
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}l c l l r r@{}}
 \toprule
 Cible & Pli & Famille & Hyperparamètres & MAE & $R^2$ \\
 \midrule
-\YS     & 0 & Forêt   & feuille 2, prof. libre, \texttt{mf} 0,5 & 43,62 & 0,472 \\
-        & 1 & Forêt   & feuille 1, prof. libre, \texttt{mf} 0,5 & 68,48 & 0,204 \\
-        & 2 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma=0{,}05$ & 49,94 & 0,273 \\
-        & 3 & Forêt   & feuille 1, prof. 10, \texttt{mf} 0,5 & 50,28 & 0,543 \\
-        & 4 & SVR RBF & $C=10$, $\varepsilon=0{,}2$, $\gamma=0{,}05$ & 71,46 & 0,191 \\
+\YS     & 0 & XGBoost & $\eta=0{,}03$, prof. 2, 300 arbres & 50,58 & 0,285 \\
+        & 1, 2 & XGBoost & $\eta=0{,}03$, prof. 6, 150 arbres & 69,41 / 46,46 & 0,197 / 0,291 \\
+        & 3 & XGBoost & $\eta=0{,}03$, prof. 2, 150 arbres & 46,48 & 0,622 \\
+        & 4 & XGBoost & $\eta=0{,}1$, prof. 2, 150 arbres & 58,89 & 0,439 \\
 \midrule
 \UTS    & 0 & Ridge   & $\alpha=100$ & 74,90 & 0,038 \\
-        & 1 & Forêt   & feuille 1, prof. libre, \texttt{mf} 0,5 & 49,49 & 0,155 \\
+        & 1 & XGBoost & $\eta=0{,}03$, prof. 4, 300 arbres & 52,25 & 0,117 \\
         & 2 & SVR RBF & $C=10$, $\varepsilon=0{,}05$, $\gamma=0{,}05$ & 38,76 & 0,399 \\
-        & 3 & Forêt   & feuille 2, prof. 10, \texttt{mf} 0,5 & 52,60 & 0,555 \\
-        & 4 & Forêt   & feuille 2, prof. libre, \texttt{mf} 0,5 & 55,98 & 0,523 \\
+        & 3, 4 & XGBoost & $\eta=0{,}03$, prof. 2, 150/300 arbres & 56,97 / 55,58 & 0,464 / 0,515 \\
 \midrule
-Allong. & 0, 1, 3 & Forêt & \texttt{mf} 0,5, feuille 5/2/5 & 2,86--3,63 & 0,166--0,468 \\
-        & 2, 4 & SVR RBF & $\varepsilon=0{,}2$, $\gamma=0{,}05$, $C=1$/$10$ & 3,61--4,25 & $-0{,}080$--$-0{,}022$ \\
+Allong. & 0, 2, 4 & XGBoost & $\eta=0{,}03$, prof. 2, 150/300 arbres & 2,91--3,76 & 0,064--0,420 \\
+        & 1 & XGBoost & $\eta=0{,}03$, prof. 4, 150 arbres & 3,55 & 0,207 \\
+        & 3 & Forêt   & feuille 5, prof. 10, \texttt{mf} 0,5 & 3,24 & 0,251 \\
 \midrule
 Charpy  & 0, 1 & SVR RBF & $C=1$, $\varepsilon=0{,}2$, $\gamma=0{,}05$ & 31,00 / 27,33 & $-0{,}038$ / 0,222 \\
         & 2, 4 & Médiane de $y$ & -- & 24,24 / 44,12 & $-0{,}034$ / $-0{,}006$ \\
-        & 3 & Forêt   & feuille 1, prof. libre, \texttt{mf} 1 & 52,09 & 0,228 \\
+        & 3 & XGBoost & $\eta=0{,}03$, prof. 6, 300 arbres & 54,66 & 0,148 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Plusieurs enseignements ressortent. En aléatoire, les choix sont
-\textbf{stables} : SVR ($C=10$, $\varepsilon=0{,}05$) pour \UTS{} dans les cinq
-plis, forêt à feuilles de taille 1 pour l'allongement. Les modèles peu
-régularisés sont préférés, ce qui est cohérent avec un contexte où des voisins
-très proches existent dans le train. En groupé, les choix sont \textbf{instables}
---- Ridge, SVR ou forêt pour \UTS{} selon le pli --- et la boucle interne
-retient même la \textbf{référence médiane} dans deux plis Charpy : en l'absence
-de séries connues, aucun modèle ne bat de façon fiable la constante pour cette
-cible. Cette instabilité illustre l'incertitude du transfert entre séries.
+Plusieurs enseignements ressortent. En aléatoire, XGBoost est retenu dans 17
+plis sur 20, avec des arbres profonds (4 à 6) et un pas de 0,1 : des modèles peu
+régularisés, cohérents avec un contexte où des voisins très proches existent dans
+le train. En groupé, la boucle interne préfère des arbres \textbf{peu profonds}
+(profondeur 2) et un pas plus faible ($\eta = 0{,}03$), c'est-à-dire des modèles
+plus réguliers ; les choix restent \textbf{instables} pour \UTS{} (Ridge, SVR ou
+XGBoost selon le pli), et la boucle interne retient la \textbf{référence médiane}
+dans deux plis Charpy : en l'absence de séries connues, aucun modèle ne bat de
+façon fiable la constante pour cette cible.
 
 \subsection{Prédictions et observations}
 
@@ -262,8 +299,9 @@ La \cref{fig:obs_pred} compare les prédictions hors pli aux valeurs observées.
 \centering
 \includegraphics[width=\textwidth]{res_observe_predit}
 \caption{Valeurs observées et prédites hors pli (OOF) par la procédure de
-sélection interne, configuration 16/médiane. Haut : validation aléatoire ; bas :
-validation groupée. La diagonale pointillée correspond à une prédiction parfaite.}
+sélection interne à six familles, configuration 16/médiane. Haut : validation
+aléatoire ; bas : validation groupée. La diagonale pointillée correspond à une
+prédiction parfaite.}
 \label{fig:obs_pred}
 \end{figure}
 
@@ -278,35 +316,36 @@ protocole, ce qui est cohérent avec l'hypothèse de températures de transition
 
 Une fois l'évaluation terminée, chaque famille est réglée par une nouvelle CV5
 sur \emph{tous} les labels (aléatoire, graine 1042, ou par groupes), puis
-réentraînée. La famille de plus faible MAE de sélection est retenue par cible
-(\cref{tab:modeles_finaux}). Ces MAE de sélection sont optimistes et \textbf{ne
-remplacent pas} les scores imbriqués ; ces modèles ont vu tous les labels et ne
-servent jamais à scorer les plis.
+réentraînée. La famille de plus faible MAE de sélection parmi les six est retenue
+par cible (\cref{tab:modeles_finaux}). Ces MAE de sélection sont optimistes et
+\textbf{ne remplacent pas} les scores imbriqués ; ces modèles ont vu tous les
+labels et ne servent jamais à scorer les plis.
 
 \begin{table}[htbp]
 \centering
 \small
-\caption{Modèles supervisés réentraînés sur tous les labels, retenus pour l'inférence.}
+\caption{Modèles supervisés réentraînés sur tous les labels, retenus pour l'inférence (six familles).}
 \label{tab:modeles_finaux}
 \begin{tabular}{@{}l l l r l@{}}
 \toprule
 CV de choix & Cible & Famille & MAE de sélection & Hyperparamètres \\
 \midrule
-Aléatoire & \YS     & SVR RBF & 31,228 & $C=10$, $\varepsilon=0{,}05$, $\gamma$=scale \\
-          & \UTS    & SVR RBF & 24,060 & $C=10$, $\varepsilon=0{,}05$, $\gamma=0{,}05$ \\
-          & Allong. & Forêt   & 1,940  & feuille 1, prof. libre, \texttt{mf} 0,5 \\
-          & Charpy  & Forêt   & 15,387 & feuille 1, prof. libre, \texttt{mf} 1 \\
+Aléatoire & \YS     & XGBoost & 26,698 & $\eta=0{,}1$, prof. 6, 300 arbres \\
+          & \UTS    & XGBoost & 21,609 & $\eta=0{,}1$, prof. 6, 300 arbres \\
+          & Allong. & XGBoost & 1,919  & $\eta=0{,}1$, prof. 6, 150 arbres \\
+          & Charpy  & XGBoost & 13,437 & $\eta=0{,}1$, prof. 6, 300 arbres \\
 \midrule
-Groupée   & \YS     & Forêt   & 58,695 & feuille 2, prof. libre, \texttt{mf} 0,5 \\
+Groupée   & \YS     & XGBoost & 57,742 & $\eta=0{,}1$, prof. 2, 150 arbres \\
           & \UTS    & SVR RBF & 46,555 & $C=10$, $\varepsilon=0{,}05$, $\gamma=0{,}05$ \\
-          & Allong. & Forêt   & 3,282  & feuille 1, prof. libre, \texttt{mf} 0,5 \\
+          & Allong. & XGBoost & 3,252  & $\eta=0{,}1$, prof. 2, 300 arbres \\
           & Charpy  & Forêt   & 32,375 & feuille 1, prof. 10, \texttt{mf} 0,5 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Au total, \textbf{80 pipelines supervisées} sont exportées (40 par protocole :
-20 modèles de plis externes et 20 réapprentissages complets), avec leur
+Au total, \textbf{168 pipelines supervisées} sont exportées : 80 par les
+notebooks 05 et 06 (cinq familles) et 88 par le notebook 08 (40 XGBoost de plis,
+40 sélections à six familles de plis et 8 XGBoost complets), avec leur
 prétraitement, leurs métadonnées (entrées, unités, identifiants du train,
 paramètres, versions) et leur empreinte SHA-256. Toutes ont été rechargées dans
 un processus Python neuf et les modèles de plis reproduisent exactement leurs
@@ -315,8 +354,8 @@ prédictions hors pli.
 \begin{aretenir}
 \begin{itemize}[leftmargin=1.2em]
   \item Configuration initiale 13/itérative : gains modestes, $R^2 \leq 0{,}19$ en validation groupée.
-  \item Configuration 16/médiane : $R^2$ de \textbf{0,66 à 0,84 en aléatoire}, mais \textbf{0,08 à 0,34 en groupé}.
-  \item \textbf{Forêt aléatoire et SVR RBF} sont les meilleures familles ; le $k$NN s'effondre dès que la série est absente.
+  \item Configuration 16/médiane, sélection parmi six familles : $R^2$ de \textbf{0,65 à 0,85 en aléatoire}, mais \textbf{0,06 à 0,37 en groupé}.
+  \item \textbf{XGBoost} est la meilleure famille sur des séries connues ; la \textbf{forêt aléatoire} reste la plus robuste sur des séries nouvelles ; le $k$NN s'effondre dès que la série est absente.
   \item Les choix internes sont stables en aléatoire, instables en groupé.
 \end{itemize}
 \end{aretenir}

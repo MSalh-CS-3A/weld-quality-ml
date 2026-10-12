@@ -1,9 +1,11 @@
 """Génère les figures du rapport LaTeX à partir des données et des exports.
 
 Ce script ne réentraîne aucun modèle : il relit le brut (`data/raw/`), la
-préparation (`data/processed/modeling/`) et les exports des notebooks 03 à 07
+préparation (`data/processed/modeling/`) et les exports des notebooks 03 à 09
 (`data/processed/experiments/`), puis écrit des PDF vectoriels dans
-`rapport_latex/figures/`. Exécuter les notebooks 01 → 07 au préalable.
+`rapport_latex/figures/`. Exécuter les notebooks 01 → 09 au préalable.
+Les résultats supervisés utilisent la sélection interne à six familles
+(XGBoost compris) du notebook 08.
 
     python rapport_latex/scripts/generer_figures.py
 
@@ -57,7 +59,8 @@ LABEL = {"yield_strength": "Limite d'élasticité (MPa)", "uts": "Résistance ma
          "elongation": "Allongement (points de %)", "charpy_J": "Énergie Charpy* (J)"}
 SHORT = {"yield_strength": "YS", "uts": "UTS", "elongation": "Allong.", "charpy_J": "Charpy*"}
 FAMILY = {"median_y": "Médiane de y", "ridge": "Ridge", "svr_rbf": "SVR RBF",
-          "random_forest": "Random Forest", "knn": "kNN", "inner_selected": "Sélection\ninterne"}
+          "random_forest": "Random Forest", "knn": "kNN", "xgboost": "XGBoost",
+          "inner_selected": "Sélection\ninterne"}
 TEXT_W = 6.3  # largeur utile du rapport en pouces
 
 
@@ -294,13 +297,10 @@ def fold_stats(df, value):
 
 
 def supervised_tables():
-    rnd = pd.read_csv(EXP / "salh_random_kfold_v1/outer_metrics.csv")
-    rnd_sel = pd.read_csv(EXP / "salh_random_kfold_v1/inner_selected_metrics.csv")
-    grp = pd.read_csv(EXP / "salh_group_kfold_v1/outer_metrics.csv")
-    grp_sel = pd.read_csv(EXP / "salh_group_kfold_v1/inner_selected_metrics.csv")
-    rnd_all = pd.concat([rnd, rnd_sel.assign(model="inner_selected")], ignore_index=True)
-    grp_all = pd.concat([grp, grp_sel.assign(model="inner_selected")], ignore_index=True)
-    return fold_stats(rnd_all, "R2"), fold_stats(grp_all, "R2")
+    # Six familles réglées en interne et procédure de sélection à six familles (notebook 08).
+    scores = pd.read_csv(EXP / "salh_xgboost_v1/benchmark_outer_metrics.csv")
+    return (fold_stats(scores[scores.protocol == "random"], "R2"),
+            fold_stats(scores[scores.protocol == "grouped"], "R2"))
 
 
 def fig_synthese():
@@ -327,7 +327,7 @@ def fig_synthese():
 
 def fig_familles():
     r, g = supervised_tables()
-    models = ["median_y", "ridge", "svr_rbf", "random_forest", "knn", "inner_selected"]
+    models = ["median_y", "ridge", "svr_rbf", "random_forest", "knn", "xgboost", "inner_selected"]
     fig, axes = plt.subplots(2, 2, figsize=(TEXT_W, 4.9), sharey=True)
     x = np.arange(len(models))
     for ax, t in zip(axes.flat, TARGETS):
@@ -352,8 +352,8 @@ def fig_familles():
 
 
 def fig_obs_pred():
-    rnd = pd.read_csv(EXP / "salh_random_kfold_v1/inner_selected_predictions.csv")
-    grp = pd.read_csv(EXP / "salh_group_kfold_v1/inner_selected_predictions.csv")
+    preds = pd.read_csv(EXP / "salh_xgboost_v1/inner_selected_predictions.csv")
+    rnd, grp = preds[preds.protocol == "random"], preds[preds.protocol == "grouped"]
     r, g = supervised_tables()
     fig, axes = plt.subplots(2, 4, figsize=(TEXT_W, 3.6))
     for row, (df, stats, color, name) in enumerate([(rnd, r, BLUE, "Aléatoire"),
@@ -496,9 +496,10 @@ def fig_apprentissage():
 
 # ------------------------------------------------------------------ COREG
 def fig_coreg():
-    c = pd.read_csv(EXP / "salh_coreg_v1/metrics_summary.csv").set_index(
-        ["protocol", "target", "method"])
-    methods = [("supervised_inner_selected", BLUE, "Sélection supervisée (référence)"),
+    # Référence supervisée actuelle : sélection à six familles ; COREG et contrôles inchangés.
+    c = pd.read_csv(EXP / "salh_xgboost_v1/supervised_coreg_summary.csv").rename(
+        columns={"model": "method"}).set_index(["protocol", "target", "method"])
+    methods = [("inner_selected", BLUE, "Sélection supervisée à six familles (référence)"),
                ("matched_knn_pair", AQUA, "Moyenne kNN L1/L2, même k, sans pseudo-labels"),
                ("coreg", ORANGE, "COREG")]
     fig, axes = plt.subplots(1, 2, figsize=(TEXT_W, 2.5), sharey=True)
@@ -543,6 +544,34 @@ def fig_coreg_iterations():
     save(fig, "coreg_iterations")
 
 
+# ------------------------------------------------------------- Validation
+def fig_validation():
+    d = pd.read_csv(EXP / "salh_validation_v1/decision_summary.csv").set_index("source")
+    sources = [("grouped", "Modèle GroupKFold"), ("random", "Modèle KFold aléatoire"),
+               ("mesures", "Mesures")]
+    # Couleurs de statut réservées, toujours accompagnées d'une étiquette.
+    decisions = [("VALIDÉ", "#0ca30c"), ("PARTIEL", "#fab219"), ("NON VALIDÉ", "#d03b3b")]
+    share = d.div(d.sum(axis=1), axis=0) * 100
+    fig, ax = plt.subplots(figsize=(TEXT_W, 1.9))
+    left = np.zeros(len(sources))
+    for decision, color in decisions:
+        v = np.array([share.loc[s, decision] for s, _ in sources])
+        n = [int(d.loc[s, decision]) for s, _ in sources]
+        ax.barh(range(len(sources)), v, left=left, height=0.62, color=color,
+                edgecolor="white", linewidth=1.5, label=decision)
+        for y, (x0, w, k) in enumerate(zip(left, v, n)):
+            if w >= 6:
+                ax.text(x0 + w / 2, y, f"{fr(w, 1)} % ({k})", ha="center", va="center",
+                        fontsize=7, color=INK)
+        left += v
+    ax.set_yticks(range(len(sources)), [name for _, name in sources])
+    ax.set_xlim(0, 100)
+    ax.set_xlabel("Part des 1 555 soudures de la cohorte (%)")
+    ax.grid(axis="y", visible=False)
+    ax.legend(ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.28))
+    save(fig, "val_decisions")
+
+
 if __name__ == "__main__":
     print("Génération des figures du rapport :")
     fig_statuts()
@@ -562,3 +591,4 @@ if __name__ == "__main__":
     fig_apprentissage()
     fig_coreg()
     fig_coreg_iterations()
+    fig_validation()

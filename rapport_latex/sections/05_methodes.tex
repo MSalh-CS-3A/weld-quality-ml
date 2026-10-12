@@ -7,8 +7,10 @@
 
 Nous comparons cinq familles supervisées vues en cours, choisies pour couvrir des
 hypothèses différentes sur la forme de la relation entre conditions de soudage et
-propriétés, puis une méthode semi-supervisée. Toutes sont implémentées avec
-scikit-learn~\cite{pedregosa_2011} dans les notebooks 03 à 07. Dans la suite,
+propriétés, puis une sixième famille ajoutée ensuite, XGBoost (notebook 08), et une
+méthode semi-supervisée. Toutes sont implémentées avec
+scikit-learn~\cite{pedregosa_2011} et la bibliothèque XGBoost~\cite{chen_guestrin_2016}
+dans les notebooks 03 à 08. Dans la suite,
 $\{(\bm{x}_i, y_i)\}_{i=1}^{n}$ désigne l'ensemble d'entraînement d'un pli, après
 prétraitement.
 
@@ -71,12 +73,32 @@ C'est une méthode locale et sans hypothèse de forme. Elle est aussi le
 \textbf{pendant supervisé de COREG}, qui repose sur deux $k$NN : la comparer
 directement permet d'isoler l'effet des pseudo-labels.
 
+\subsubsection{XGBoost (\emph{gradient boosting} d'arbres)}
+XGBoost~\cite{chen_guestrin_2016} construit un modèle \emph{additif} : chaque
+nouvel arbre $f_m$ corrige les résidus des précédents, avec un pas d'apprentissage
+$\eta$, et l'objectif pénalise la complexité des arbres :
+\begin{gather}
+  \hat{y}^{(M)}(\bm{x}) = \hat{y}^{(0)} + \eta \sum_{m=1}^{M} f_m(\bm{x}), \\
+  \mathcal{L} = \sum_{i=1}^{n} \bigl(y_i - \hat{y}_i\bigr)^2 + \sum_{m=1}^{M}\Bigl(\gamma T_m + \tfrac{\lambda}{2}\lVert \bm{w}_m\rVert_2^2\Bigr),
+\end{gather}
+où $T_m$ est le nombre de feuilles et $\bm{w}_m$ les valeurs des feuilles de
+l'arbre $m$. Contrairement à la forêt, qui moyenne des arbres indépendants pour
+réduire la variance, le \emph{boosting} réduit le biais en ajoutant des arbres
+peu profonds de façon séquentielle. Nous réglons la profondeur, $\eta$ et le
+nombre d'arbres ; sont fixés \texttt{min\_child\_weight}~=~5, un
+sous-échantillonnage de 80\,\% des lignes et des variables par arbre,
+$\lambda = 1$, $\gamma = 0$, la méthode d'histogrammes, la graine 42 et aucun
+arrêt précoce. Les NaN sont imputés par la médiane du train comme pour les autres
+familles, afin de comparer à préparation identique : la gestion native des
+valeurs manquantes de XGBoost n'est pas évaluée.
+
 \subsubsection{Grilles d'hyperparamètres}
 
 Le \cref{tab:grilles} donne les grilles explorées. Elles ont été fixées
 \emph{avant} les entraînements comme budgets raisonnables, et non optimisées a
 posteriori. Au total, \textbf{39 configurations} sont évaluées par cible et par
-pli externe.
+pli externe pour les cinq premières familles, puis \textbf{51} avec les 12
+configurations XGBoost.
 
 \begin{table}[htbp]
 \centering
@@ -92,8 +114,9 @@ Ridge & Contrôle linéaire régularisé & $\alpha \in \{0{,}01;\,0{,}1;\,1;\,10
 SVR RBF & Non-linéarité lisse à noyau & \makecell[l]{$C\in\{1,10,100\}$, $\gamma\in\{\text{scale}, 0{,}05\}$,\\ $\varepsilon\in\{0{,}05;\,0{,}2\}$} & 12 \\
 Forêt aléatoire & Interactions et seuils & \makecell[l]{300 arbres ; feuille $\in\{1,2,5\}$,\\ profondeur $\in\{\text{libre}, 10\}$, \texttt{max\_features} $\in\{0{,}5;\,1\}$} & 12 \\
 $k$NN & Méthode locale, contrôle de COREG & $k\in\{3,5,9,15\}$, $p\in\{1,2\}$, poids uniformes & 8 \\
+XGBoost & \emph{Boosting} d'arbres, réduction du biais & \makecell[l]{profondeur $\in\{2,4,6\}$, $\eta\in\{0{,}03;\,0{,}1\}$,\\ arbres $\in\{150, 300\}$} & 12 \\
 \midrule
-\multicolumn{3}{@{}l}{Total par cible et par pli externe} & 39 \\
+\multicolumn{3}{@{}l}{Total par cible et par pli externe (cinq familles, puis six)} & 39 / 51 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -254,8 +277,9 @@ entrées peuvent propager une même erreur.
 \end{precaution}
 
 \begin{aretenir}
-Cinq familles supervisées couvrent le constant, le linéaire, le non-linéaire lisse,
-les arbres et le local ; 39 configurations sont réglées par MAE interne.
+Six familles supervisées couvrent le constant, le linéaire, le non-linéaire lisse,
+les arbres (moyennés ou boostés) et le local ; 51 configurations sont réglées par
+MAE interne.
 COREG est retenu comme méthode semi-supervisée parce qu'il est conçu pour la
 régression, inductif et directement comparable à un contrôle $k$NN supervisé.
 \end{aretenir}

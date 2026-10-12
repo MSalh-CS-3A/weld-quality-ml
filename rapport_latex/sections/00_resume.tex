@@ -22,28 +22,37 @@ allongement et, à titre exploratoire, énergie Charpy à température d'essai c
 La préparation est entièrement traçable : nettoyage déterministe, provenance de
 66\,080 cellules, déduplication, cohorte principale de 1\,555 lignes réparties
 en 44 séries, puis prétraitement (standardisation, encodage, imputation)
-\emph{appris uniquement dans les plis d'entraînement}. Cinq familles supervisées
---- médiane, Ridge, SVR à noyau RBF, forêt aléatoire et $k$ plus proches voisins ---
-sont comparées par validation croisée \emph{imbriquée} selon deux scénarios :
+\emph{appris uniquement dans les plis d'entraînement}. Six familles supervisées
+--- médiane, Ridge, SVR à noyau RBF, forêt aléatoire, $k$ plus proches voisins et
+XGBoost --- sont comparées par validation croisée \emph{imbriquée} selon deux scénarios :
 un découpage aléatoire des lignes et un découpage par séries, qui teste le
 transfert à des séries absentes de l'entraînement. La méthode semi-supervisée
 COREG~\cite{zhou_li_2005} est ensuite appliquée selon un protocole inductif.
 
 Avec 16 entrées numériques, le procédé et une imputation médiane, la procédure
-supervisée atteint des \Rdeux{} moyens de 0,755 (\YS), 0,836 (\UTS), 0,660
-(allongement) et 0,776 (Charpy) en validation aléatoire, mais seulement 0,337,
-0,334, 0,157 et 0,075 lorsque des séries entières sont tenues à l'écart.
-COREG n'améliore pas cette référence. Les diagnostics attribuent une large part
-de l'erreur à des décalages de niveau entre séries. La conclusion principale est
-donc méthodologique : prédire une série déjà représentée est réaliste, prédire
-une nouvelle étude reste difficile avec les entrées disponibles. Les
-recommandations portent sur la collecte et l'évaluation des données ; aucun
-réglage de soudage « optimal » n'est déduit de ces associations.
+supervisée qui choisit la famille parmi les six atteint des \Rdeux{} moyens de
+0,816 (\YS), 0,830 (\UTS), 0,646 (allongement) et 0,845 (Charpy) en validation
+aléatoire, mais seulement 0,367, 0,307, 0,260 et 0,058 lorsque des séries entières
+sont tenues à l'écart. XGBoost est la meilleure famille sur des séries connues ;
+il ne résout pas le transfert à de nouvelles séries. COREG n'améliore pas la
+référence supervisée. Les diagnostics attribuent une large part de l'erreur à des
+décalages de niveau entre séries.
+
+Pour traduire ces prédictions en décision de qualité, des seuils sont tirés des
+normes de classification du métal fondu (ISO~2560-A, classe E~42~2 : \YS{} $\geq$
+420\,MPa, \UTS{} 500--640\,MPa, allongement $\geq$ 20\,\%, 47\,J à $-20$\,°C)
+et appliqués avec une bande de garde de deux erreurs types (JCGM~106). Le modèle
+ne valide alors aucune soudure : il peut trier des candidats, pas remplacer
+l'essai. La conclusion principale est donc méthodologique : prédire une série
+déjà représentée est réaliste, prédire une nouvelle étude reste difficile avec
+les entrées disponibles. Les recommandations portent sur la collecte et
+l'évaluation des données ; aucun réglage de soudage « optimal » n'est déduit de
+ces associations.
 
 \medskip
 \noindent\textbf{Mots-clés :} soudage, aciers, propriétés mécaniques, régression,
 données manquantes, validation croisée imbriquée, GroupKFold, forêt aléatoire,
-SVR, apprentissage semi-supervisé, COREG.
+SVR, XGBoost, apprentissage semi-supervisé, COREG, seuils normatifs, ISO~2560.
 
 \subsection*{Guide de lecture}
 
@@ -68,9 +77,9 @@ Section & Contenu \\
 \ref{sec:resultats}  & Résultats d'entraînement supervisé \\
 \ref{sec:diag}       & Diagnostics des performances et explicabilité \\
 \ref{sec:ssl}        & Résultats semi-supervisés (COREG) \\
+\ref{sec:validation} & Seuils normatifs et validation des soudures \\
 \ref{sec:discussion} & Analyse comparative, limites et recommandations \\
 \ref{sec:conclusion} & Conclusion et perspectives \\
-\ref{sec:organisation} & Organisation de l'équipe et diagramme de Gantt \\
 Annexes              & Dictionnaire des variables, reproductibilité, tableaux complets, glossaire \\
 \bottomrule
 \end{tabularx}
@@ -88,5 +97,4 @@ Annexes              & Dictionnaire des variables, reproductibilité, tableaux c
   \item \textbf{Validation aléatoire} : KFold sur les lignes ; \textbf{validation groupée} : GroupKFold sur les séries inférées (\cref{sec:protocole}).
   \item Les scores sont, sauf mention contraire, des \textbf{moyennes non pondérées sur les cinq plis externes}, suivies de leur écart-type (SD) entre plis. Un SD n'est pas un intervalle de confiance.
   \item Les nombres utilisent la virgule décimale ; les tableaux reprennent les valeurs des exports des notebooks, arrondies à trois décimales.
-  \item Les éléments affichés \acompleter{ainsi} doivent être renseignés par l'équipe : ils ne sont pas inventés.
 \end{itemize}

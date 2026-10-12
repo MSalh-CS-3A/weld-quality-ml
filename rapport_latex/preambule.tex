@@ -80,11 +80,10 @@
 \captionsetup[table]{position=top,skip=4pt}
 \captionsetup[figure]{skip=6pt}
 
-% ---------- Dessins (schémas, Gantt) --------------------------------
+% ---------- Dessins (schémas) ---------------------------------------
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc,
                 decorations.pathreplacing,backgrounds,babel}
-\usepackage{pgfgantt}
 \usepackage{eso-pic} % bandeaux de la page de garde
 
 % ---------- Algorithmes ---------------------------------------------
@@ -114,10 +113,6 @@
   title={Intuition},#1}
 \newtcolorbox{precaution}[1][]{colback=orangeviz!6,colframe=orangeviz!80!black,
   title={Précaution d'interprétation},#1}
-
-% ---------- Éléments à compléter par l'équipe -----------------------
-% \acompleter{texte} affiche « [À compléter : texte] » ; \acompleter{} affiche « [À compléter] ».
-\newcommand{\acompleter}[1]{\textcolor{alerte}{\textbf{[À compléter\if\relax\detokenize{#1}\relax\else\ : #1\fi]}}}
 
 % ---------- Notations récurrentes -----------------------------------
 \newcommand{\YS}{YS}

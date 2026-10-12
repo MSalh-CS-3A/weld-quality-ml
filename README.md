@@ -134,10 +134,10 @@ Deux documents en français regroupent les travaux pour lecture :
 et [le rapport du projet, version 1](reports/16_rapport_projet_v1_fr.md).
 Ce dernier est aussi disponible en
 [PDF de cinq pages du 10 octobre, antérieur à XGBoost](output/pdf/rapport_projet_v1_fr.pdf).
-Le [rapport complet en LaTeX](rapport_latex/README.md) détaille toutes les
-étapes, de l'EDA à l'analyse des résultats d'entraînement.
-Les trois auteurs sont renseignés ; le numéro d'équipe, les dates, les
-responsabilités et les heures réelles du Gantt restent à compléter.
+Le [rapport complet en LaTeX](rapport_latex/README.md)
+([PDF](output/pdf/rapport_complet_fr.pdf)) détaille toutes les étapes, de l'EDA
+à la validation des soudures, XGBoost compris. Il ne comporte ni numéro d'équipe
+ni section d'organisation (Gantt, répartition des tâches).
 
 L’EDA conserve une ACP descriptive sur les onze entrées complètes, sans
 imputation. Les anciens essais détaillés sont dans les rapports historiques

@@ -11,22 +11,28 @@ expérimentales, avec des absences dépendant du procédé, des valeurs censuré
 des unités douteuses et des protocoles Charpy hétérogènes. Une préparation
 entièrement traçable, un prétraitement appris dans chaque pli et une validation
 croisée imbriquée selon deux scénarios ont permis une comparaison rigoureuse de
-cinq familles supervisées et d'une méthode semi-supervisée.
+six familles supervisées, XGBoost compris, et d'une méthode semi-supervisée. Des
+seuils tirés de la norme ISO 2560-A ont enfin traduit les prédictions en
+décisions de conformité.
 
-Les résultats tiennent en trois phrases. \textbf{(1)} Avec 16 entrées et une
-imputation médiane, la forêt aléatoire et la SVR RBF prédisent bien les soudures
-de séries connues ($R^2$ de 0,66 à 0,84). \textbf{(2)} Le transfert à des séries
-absentes reste difficile ($R^2$ de 0,08 à 0,34), principalement à cause de
-décalages de niveau entre études que les entrées disponibles n'expliquent pas.
-\textbf{(3)} COREG n'améliore pas la référence supervisée, car les entrées sans
-label n'apportent pas l'information manquante.
+Les résultats tiennent en quatre phrases. \textbf{(1)} Avec 16 entrées et une
+imputation médiane, la sélection parmi six familles, dominée par XGBoost, prédit
+bien les soudures de séries connues ($R^2$ de 0,65 à 0,85). \textbf{(2)} Le
+transfert à des séries absentes reste difficile ($R^2$ de 0,06 à 0,37),
+principalement à cause de décalages de niveau entre études que les entrées
+disponibles n'expliquent pas. \textbf{(3)} COREG n'améliore pas la référence
+supervisée, car les entrées sans label n'apportent pas l'information manquante.
+\textbf{(4)} Face à la classe ISO 2560-A E~42~2 avec une bande de garde de deux
+erreurs types, le modèle ne valide aucune soudure : ses décisions tranchées sont
+fiables mais rares, il sert à trier des candidats avant essai.
 
 \paragraph{Perspectives.}
 \begin{itemize}
   \item \textbf{Validation indépendante} : évaluer la procédure retenue sur de nouvelles séries jamais utilisées pour la concevoir.
   \item \textbf{Enrichir les entrées} : réintégrer Nb, V, Ti, B ou Cu après vérification des unités par source, et tester leur apport par validation groupée.
   \item \textbf{Harmoniser Charpy} : poursuivre l'audit des 21 séries non résolues, séparer courbes $E(T)$ et températures de transition, puis construire une tâche homogène.
-  \item \textbf{Quantifier l'incertitude} : intervalles de prédiction (forêts quantiles, prédiction conforme) et détection des entrées hors domaine.
+  \item \textbf{Quantifier l'incertitude} : intervalles de prédiction propres à chaque soudure (forêts quantiles, prédiction conforme, CV+~\cite{barber_2021}) pour remplacer l'erreur globale de la règle de validation, et détection des entrées hors domaine.
+  \item \textbf{Arbitrer la borne haute d'\UTS} dans la règle de validation : c'est le seul levier, à $k$ fixé, qui permet au modèle de prononcer des VALIDÉ.
   \item \textbf{Modèles hiérarchiques} : modéliser explicitement un effet aléatoire de série pour séparer variabilité intra- et inter-études.
   \item \textbf{Semi-supervisé} : tester COREG et d'autres méthodes dans un régime à labels rares (25 ou 50\,\%), où leur intérêt théorique est le plus grand.
 \end{itemize}

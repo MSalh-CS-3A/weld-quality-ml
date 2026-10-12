@@ -66,7 +66,7 @@ réglage, et non celle d'une configuration choisie après coup.
     \tikz\fill[vertviz!80] (0,0) rectangle (0.3,0.2); \ validation interne (réglage)};
   \node[font=\scriptsize, align=left, anchor=north west, text width=4.3cm] at (8.4,-2.0) {
     \textbf{Pour chaque pli externe :}\\
-    1. 39 configurations $\times$ 3 plis internes ;\\
+    1. 39 (puis 51) configurations $\times$ 3 plis internes ;\\
     2. choix par MAE interne moyenne ;\\
     3. réapprentissage sur tout le train externe ;\\
     4. prédiction unique de la validation externe.};
@@ -80,8 +80,11 @@ internes dans chaque train externe pour le réglage. Le prétraitement est réap
 Pour chaque cible et chaque pli externe, cela représente 39 configurations
 $\times$ 3 validations internes, plus un réapprentissage par famille : dans le
 benchmark du notebook 03, \textbf{2\,340 ajustements internes et 100 réapprentissages
-externes}, soit 2\,440 ajustements d'estimateurs. Tout échec d'ajustement lève une
-erreur (\texttt{error\_score='raise'}) plutôt que d'être masqué.
+externes}, soit 2\,440 ajustements d'estimateurs. L'ajout de XGBoost (notebook 08)
+représente 12 configurations $\times$ 3 validations internes $\times$ 5 plis
+$\times$ 4 cibles $\times$ 2 protocoles, plus 40 réapprentissages externes et
+les réglages des modèles complets, soit 1\,968 ajustements. Tout échec d'ajustement
+lève une erreur (\texttt{error\_score='raise'}) plutôt que d'être masqué.
 
 \subsection{Deux scénarios de validation, deux questions}
 \label{subsec:deux_scenarios}

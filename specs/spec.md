@@ -709,6 +709,10 @@ L'équipe comporte trois membres, confirmés par l'utilisateur : Mohamed SALH,
 Mohamed CHEBLI et Idriss BEN LETAIFA. Le numéro d'équipe et le Gantt réel
 (dates, partage des tâches, heures) ne sont pas encore renseignés. La trame
 du rapport ne leur attribue aucun travail ni aucune durée sans information.
+Le 12 octobre, à la demande de l'utilisateur, le numéro d'équipe et la section
+d'organisation (Gantt, répartition des tâches) sont retirés du rapport détaillé
+LaTeX, actualisé avec XGBoost (sélection à six familles) et la validation par
+seuils ISO 2560-A.
 
 ## Extension XGBoost autorisée — 12 octobre 2026
 

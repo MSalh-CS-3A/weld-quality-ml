@@ -73,7 +73,7 @@ d'entrée (\cref{subsec:entrees_exclues}).
 
 \subsection{Démarche suivie}
 
-Le projet est découpé en sept notebooks autonomes, exécutés dans l'ordre. La
+Le projet est découpé en neuf notebooks autonomes, exécutés dans l'ordre. La
 \cref{fig:demarche} présente leur enchaînement et la section du rapport qui
 correspond à chacun.
 
@@ -92,7 +92,9 @@ correspond à chacun.
   \node[etape, below=of n4] (n5) {\textbf{05 --- CV aléatoire}\\ 16/médiane,\\ exports\\ {\color{csbordeaux}\S\ref{subsec:res16}}};
   \node[etape, left=of n5] (n6) {\textbf{06 --- CV groupée}\\ 16/médiane,\\ exports\\ {\color{csbordeaux}\S\ref{subsec:res16}}};
   \node[etape, left=of n6] (n7) {\textbf{07 --- COREG}\\ semi-supervisé\\ inductif\\ {\color{csbordeaux}\S\ref{sec:ssl}}};
-  \node[etape, left=of n7, fill=white, draw=csgris] (n8) {\textbf{Synthèse}\\ comparaison,\\ recommandations\\ {\color{csbordeaux}\S\ref{sec:discussion}}};
+  \node[etape, left=of n7] (n8) {\textbf{08 --- XGBoost}\\ six familles,\\ deux CV, exports\\ {\color{csbordeaux}\S\ref{subsec:res16}}};
+  \node[etape, below=of n8] (n9) {\textbf{09 --- Validation}\\ seuils ISO 2560-A,\\ bande de garde\\ {\color{csbordeaux}\S\ref{sec:validation}}};
+  \node[etape, right=of n9, fill=white, draw=csgris] (n10) {\textbf{Synthèse}\\ comparaison,\\ recommandations\\ {\color{csbordeaux}\S\ref{sec:discussion}}};
   \draw[fleche] (n1) -- (n2);
   \draw[fleche] (n2) -- (n3);
   \draw[fleche] (n3) -- (n4);
@@ -100,11 +102,14 @@ correspond à chacun.
   \draw[fleche] (n5) -- (n6);
   \draw[fleche] (n6) -- (n7);
   \draw[fleche] (n7) -- (n8);
+  \draw[fleche] (n8) -- (n9);
+  \draw[fleche] (n9) -- (n10);
 \end{tikzpicture}
 \caption{Enchaînement des étapes du projet. Chaque boîte correspond à un notebook
 du dossier \texttt{notebooks/} ; la référence indique la section du rapport qui
 le décrit. Le diagnostic (04) a motivé le passage de la configuration initiale
-13 entrées/imputation itérative à la configuration 16 entrées/imputation médiane.}
+13 entrées/imputation itérative à la configuration 16 entrées/imputation médiane ;
+le notebook 08 ajoute XGBoost à cette configuration.}
 \label{fig:demarche}
 \end{figure}
 
@@ -130,13 +135,13 @@ et les modèles sont produits localement et ne sont pas versionnés.}
 \fichier{sujet.md}                   & Énoncé original, conservé tel quel \\
 \fichier{specs/spec.md}              & Décisions scientifiques et justifications (protocole actif) \\
 \fichier{scripts/download\_data.py}  & Téléchargement autonome et vérification SHA-256 de l'archive Cambridge \\
-\fichier{notebooks/01\ldots07}       & Code d'analyse, de préparation, d'entraînement et d'évaluation \\
+\fichier{notebooks/01\ldots09}       & Code d'analyse, de préparation, d'entraînement, d'évaluation et de validation \\
 \fichier{data/raw/}                  & Fichiers sources inchangés (\texttt{welddb.data}, \texttt{.info}, \texttt{.tex}) \\
 \fichier{data/processed/}            & Exports dérivés : table maître, provenance, plis, scores, prédictions \\
-\fichier{models/}                    & 188 pipelines complètes sérialisées avec leurs métadonnées \\
-\fichier{reports/}                   & Rapports intermédiaires (01 à 16) et figures historiques \\
-\fichier{tests/}                     & 37 tests ciblés hors ligne \\
-\fichier{rapport\_latex/}            & Le présent rapport et le script de génération de ses figures \\
+\fichier{models/}                    & 276 pipelines complètes sérialisées avec leurs métadonnées \\
+\fichier{reports/}                   & Rapports intermédiaires (01 à 18) et leurs figures \\
+\fichier{tests/}                     & 47 tests ciblés hors ligne \\
+\fichier{rapport\_latex/}            & Le présent rapport, le rapport de synthèse et le script de leurs figures \\
 \bottomrule
 \end{tabularx}
 \end{table}
