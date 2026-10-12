@@ -22,9 +22,10 @@ data/raw/                     fichiers d’origine préservés, ignorés par Git
 data/processed/modeling/       exports reproductibles, ignorés par Git
 data/processed/experiments/    scores, prédictions et recherches, ignorés par Git
 models/                       pipelines complètes et métadonnées locales, ignorées par Git
-reports/                      analyses, rapport intermédiaire et figures
-rapport_latex/                rapport complet en LaTeX et script de ses figures
-specs/                        protocole et organisation du binôme
+reports/                      rapports intermédiaires 01–18 et leurs figures
+rapport_latex/                rapports LaTeX (synthèse de 10 pages, complet) et script des figures
+output/pdf/                   PDF compilés des deux rapports
+specs/                        protocole et organisation de l'équipe
 tests/                        contrôles ciblés des notebooks et du téléchargement
 ```
 

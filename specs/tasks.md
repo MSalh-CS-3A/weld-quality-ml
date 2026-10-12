@@ -276,3 +276,13 @@ applique la règle VALIDÉ / PARTIEL / NON VALIDÉ aux mesures et aux prédictio
 hors pli des deux protocoles (sélection à six familles) ; 47 tests passent.
 Rapport 18 ajouté. Le traitement de la borne haute d'UTS reste à arbitrer :
 avec k = 2, elle empêche tout VALIDÉ prédit.
+
+### Rapports finaux et nettoyage — 12 octobre 2026
+
+Rapport détaillé LaTeX actualisé (XGBoost, seuils et validation ; numéro
+d'équipe et section organisation/Gantt retirés à la demande de l'utilisateur).
+Nouveau rapport de synthèse de 10 pages (`rapport_latex/rapport_final.tex`,
+`output/pdf/rapport_synthese_fr.pdf`) qui remplace l'ancien PDF de cinq pages.
+Dépôt nettoyé : stub `src/`, figures historiques orphelines et `.gitkeep`
+redondants retirés. Restent ouverts : numéro d'équipe et Gantt réel si l'énoncé
+les exige dans le rapport de synthèse, revue croisée avant la fusion finale.
