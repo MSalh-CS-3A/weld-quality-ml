@@ -82,8 +82,9 @@ qualité. Les résultats restent descriptifs et peuvent refléter les séries.
 Repartir d'un noyau neuf et exécuter toutes les cellules du notebook. Les matrices,
 provenances par cellule, bornes, statuts originaux, cas à vérifier, annotations,
 groupes, plis, métriques et manifeste sont dans
-`data/processed/preprocessing/` (ignoré par Git). Les figures sont dans
-`reports/figures/`. Aucun modèle entraîné n'est sauvegardé.
+`data/processed/preprocessing/` (ignoré par Git). Les figures `02_*` de cette
+étape historique, retirées de `reports/figures/` lors du nettoyage final, restent
+dans l'historique Git (commit `ef32bc3`). Aucun modèle entraîné n'est sauvegardé.
 
 SHA-256 du brut : `eb46df81a454c8e549187d87c67a6e72b88676f760e8688a782c832737676ac1`.
 Versions : Python 3.14.7, pandas 3.0.6,
